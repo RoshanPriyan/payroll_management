@@ -1,0 +1,12 @@
+[
+ {"id":1,"name":"Amit Sharma","role":"Mason","phone":"+91 98765 10234","salary":850,"salaryType":"Daily","paymentMode":"Cash","status":"Active"},
+ {"id":2,"name":"Priya Singh","role":"Site Supervisor","phone":"+91 98765 88721","salary":1200,"salaryType":"Daily","paymentMode":"UPI","status":"Active"},
+ {"id":3,"name":"Rohan Verma","role":"Electrician","phone":"+91 99872 66013","salary":900,"salaryType":"Daily","paymentMode":"Bank Transfer","status":"Active"},
+ {"id":4,"name":"Sneha Patel","role":"Accountant","phone":"+91 99221 74567","salary":18000,"salaryType":"Weekly","paymentMode":"Bank Transfer","status":"Active"},
+ {"id":5,"name":"Vikas Yadav","role":"Plumber","phone":"+91 98112 34561","salary":5200,"salaryType":"Weekly","paymentMode":"Cash","status":"Inactive"},
+ {"id":6,"name":"Neha Gupta","role":"Designer","phone":"+91 97891 44321","salary":30000,"salaryType":"Monthly","paymentMode":"Bank Transfer","status":"Active"},
+ {"id":7,"name":"Arjun Mehta","role":"Carpenter","phone":"+91 98100 11223","salary":780,"salaryType":"Daily","paymentMode":"UPI","status":"Active"},
+ {"id":8,"name":"Kavya Nair","role":"HR Assistant","phone":"+91 98771 66113","salary":15000,"salaryType":"Weekly","paymentMode":"UPI","status":"Active"},
+ {"id":9,"name":"Sanjay Kumar","role":"Painter","phone":"+91 98989 23456","salary":700,"salaryType":"Daily","paymentMode":"Cash","status":"Active"},
+ {"id":10,"name":"Meera Joshi","role":"Admin","phone":"+91 97333 22334","salary":28000,"salaryType":"Monthly","paymentMode":"Bank Transfer","status":"Active"}
+]

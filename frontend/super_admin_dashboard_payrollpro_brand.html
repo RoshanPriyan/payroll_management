@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayrollPro — Super Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F172A;
+    --ink-soft:#64748B;
+    --ink-faint:#94A3B8;
+    --line:rgba(15,23,42,0.08);
+    --bg:#F8FAFC;
+    --surface:rgba(255,255,255,0.7);
+    --surface-alt:rgba(248,250,252,0.75);
+
+    --primary:#2563EB;
+    --primary-dark:#1E3A8A;
+    --primary-deeper:#0F172A;
+    --primary-tint:rgba(37,99,235,0.05);
+    --primary-tint-2:rgba(37,99,235,0.15);
+
+    --gold:#3B82F6;
+    --gold-tint:rgba(37,99,235,0.05);
+
+    --blue:#2563EB;
+    --blue-tint:rgba(37,99,235,0.05);
+    --green:#16A34A;
+    --green-tint:#4ADE80;
+    --red:#F59E0B;
+    --red-tint:#FBBF24;
+    --orange:#F59E0B;
+    --orange-tint:#FBBF24;
+
+    --radius-lg:16px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --shadow-sm: 0 1px 2px rgba(18,32,25,0.04), 0 1px 1px rgba(18,32,25,0.03);
+    --shadow-md: 0 8px 24px -8px rgba(18,32,25,0.12), 0 2px 6px -2px rgba(18,32,25,0.06);
+    --shadow-lg: 0 20px 48px -12px rgba(6,47,34,0.22);
+
+    --font-display:'Sora', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+
+    --sidebar-w: 264px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+    line-height:1.5;
+  }
+  ::selection{ background:var(--primary-tint-2); color:var(--primary-deeper); }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; cursor:pointer; }
+  ul{ list-style:none; }
+  img,svg{ display:block; }
+
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
+
+  /* ---------- App shell ---------- */
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex-shrink:0;
+    background: linear-gradient(185deg, var(--primary-deeper) 0%, var(--primary-dark) 55%, var(--primary) 130%);
+    color:#F1F5F9;
+    position:fixed;
+    top:0; left:0; bottom:0;
+    display:flex;
+    flex-direction:column;
+    z-index:60;
+    transition:transform .28s ease;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:22px 22px 18px;
+    border-bottom:1px solid rgba(255,255,255,0.09);
+  }
+  .brand-mark{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg, #2563eb, #1d4ed8);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    font-family:var(--font-display); font-weight:800; font-size:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.25);
+  }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:16.5px; letter-spacing:.2px; }
+  .brand-sub{ font-size:10.5px; color:#94A3B8; letter-spacing:.6px; text-transform:uppercase; margin-top:1px; }
+
+  .nav-scroll{ flex:1; overflow-y:auto; padding:16px 12px 12px; }
+  .nav-section-label{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:#94A3B8;
+    padding:14px 12px 6px;
+    font-weight:600;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px;
+    border-radius:10px;
+    color:#F1F5F9;
+    font-size:13.5px; font-weight:500;
+    margin-bottom:2px;
+    position:relative;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-item svg{ width:18px; height:18px; flex-shrink:0; opacity:.95; fill:currentColor; stroke:none; }
+  .nav-item:hover{ background:rgba(255,255,255,0.07); color:#fff; }
+  .nav-item.active{
+    background:rgba(255,255,255,0.13);
+    color:#fff;
+    box-shadow: inset 3px 0 0 var(--gold);
+  }
+  .nav-item .badge-count{
+    margin-left:auto;
+    background:rgba(37,99,235,0.25);
+    color:#fff;
+    font-size:10.5px; font-weight:700;
+    padding:1px 7px; border-radius:20px;
+  }
+  .sidebar-foot{
+    padding:16px; border-top:1px solid rgba(255,255,255,0.09);
+  }
+  .logout-btn{
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:10px 12px; border-radius:10px;
+    background:#FBBF24; color:#0F172A;
+    border:1px solid #F59E0B;
+    font-size:13.5px; font-weight:600;
+  }
+  .logout-btn:hover{ background:#F59E0B; }
+  .logout-btn svg{ width:16px; height:16px; }
+
+  .sidebar-close{ display:none; }
+  .search-box,
+  .icon-btn[aria-label="Notifications"],
+  .icon-btn[aria-label="Messages"]{ display:none; }
+
+  /* ---------- Main ---------- */
+  .main{
+    margin-left:var(--sidebar-w);
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Topbar */
+  .topbar{
+    height:68px;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center;
+    gap:16px;
+    padding:0 24px;
+    position:sticky; top:0; z-index:40;
+  }
+  .menu-toggle{
+    display:none;
+    width:36px; height:36px; border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); align-items:center; justify-content:center;
+  }
+  .menu-toggle svg{ width:18px; height:18px; color:var(--ink-soft); }
+
+  .search-box{
+    display:flex; align-items:center; gap:9px;
+    background:var(--surface-alt);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 14px;
+    width:340px;
+    max-width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .search-box:focus-within{ border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-tint); }
+  .search-box svg{ width:16px; height:16px; color:var(--ink-faint); flex-shrink:0; }
+  .search-box input{
+    border:none; outline:none; background:transparent; font-size:13.5px; width:100%; color:var(--ink);
+    font-family:var(--font-body);
+  }
+  .search-box input::placeholder{ color:var(--ink-faint); }
+  .kbd-hint{
+    font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);
+    border:1px solid var(--line); border-radius:5px; padding:1px 6px; flex-shrink:0;
+  }
+
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+
+  .icon-btn{
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface-alt); border:1px solid var(--line);
+    position:relative;
+    color:var(--ink-soft);
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover{ background:var(--primary-tint); border-color:var(--primary-tint-2); color:var(--primary-dark); }
+  .icon-btn svg{ width:18px; height:18px; }
+  .ping-dot{
+    position:absolute; top:6px; right:7px;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--red); border:2px solid var(--surface);
+  }
+
+  .profile-chip{
+    display:flex; align-items:center; gap:10px;
+    padding:5px 12px 5px 6px;
+    border-radius:30px;
+    border:1px solid var(--line);
+    background:var(--surface-alt);
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg, var(--primary), #3B82F6);
+    color:#fff; font-family:var(--font-display); font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .profile-meta{ line-height:1.25; }
+  .profile-name{ font-size:12.5px; font-weight:700; color:var(--ink); }
+  .profile-role{ font-size:10.5px; color:var(--ink-faint); font-weight:500; }
+
+  /* Content */
+  .content{ padding:26px 28px 60px; max-width:1440px; width:100%; margin:0 auto; }
+
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+  .page-head h1{ font-family:var(--font-display); font-size:23px; font-weight:700; letter-spacing:-.2px; }
+  .page-head p{ color:var(--ink-soft); font-size:13px; margin-top:3px; }
+  .head-actions{ display:flex; gap:10px; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:9px 15px; border-radius:9px; font-size:13px; font-weight:600;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+    white-space:nowrap;
+  }
+  .btn svg{ width:15px; height:15px; }
+  .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-sm); }
+  .btn-primary{ background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; border-color:transparent; box-shadow:0 6px 16px -6px rgba(11,110,79,0.55); }
+  .btn-primary:hover{ box-shadow:0 10px 22px -6px rgba(11,110,79,0.6); }
+  .btn-gold{ background:linear-gradient(135deg, var(--gold), #60A5FA); color:#fff; border-color:transparent; }
+
+  /* ---------- Stat cards ---------- */
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:16px;
+    margin-bottom:26px;
+  }
+  .stat-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow-sm);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .stat-card::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--stripe, var(--primary));
+  }
+  .stat-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .stat-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .stat-icon{
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--stat-tint, var(--primary-tint));
+    color:var(--stat-color, var(--primary-dark));
+  }
+  .stat-icon svg{ width:19px; height:19px; }
+  .stat-trend{
+    font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px;
+    display:flex; align-items:center; gap:3px;
+  }
+  .stat-trend.up{ background:var(--green-tint); color:var(--green); }
+  .stat-trend.down{ background:var(--red-tint); color:var(--red); }
+  .stat-trend svg{ width:10px; height:10px; }
+  .stat-value{ font-family:var(--font-display); font-size:25px; font-weight:700; letter-spacing:-.3px; }
+  .stat-label{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; font-weight:500; }
+
+  /* ---------- Section shell ---------- */
+  .section-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm);
+    margin-bottom:24px;
+  }
+  .section-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap;
+  }
+  .section-head h2{ font-family:var(--font-display); font-size:15.5px; font-weight:700; }
+  .section-head .sub{ font-size:12px; color:var(--ink-faint); margin-top:2px; font-weight:500; }
+  .link-btn{ font-size:12.5px; font-weight:600; color:var(--primary-dark); display:flex; align-items:center; gap:4px; }
+  .link-btn svg{ width:13px; height:13px; }
+
+  .two-col{ display:grid; grid-template-columns: 1.4fr 1fr; gap:20px; align-items:start; }
+  .grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:20px; }
+  .grid-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+
+  /* ---------- Mini metric cards (subscription) ---------- */
+  .mini-card{
+    border:1px solid var(--line); border-radius:var(--radius-md); padding:16px;
+    background:var(--surface-alt);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .mini-top{ display:flex; align-items:center; gap:10px; }
+  .mini-icon{ width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+  .mini-icon svg{ width:15px; height:15px; }
+  .mini-label{ font-size:12px; font-weight:600; color:var(--ink-soft); }
+  .mini-value{ font-family:var(--font-display); font-size:21px; font-weight:700; }
+  .mini-bar{ height:5px; border-radius:6px; background:var(--line); overflow:hidden; }
+  .mini-bar span{ display:block; height:100%; border-radius:6px; }
+
+  /* ---------- Table ---------- */
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:920px; }
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--ink-faint); font-weight:700; padding:12px 20px; background:var(--surface-alt);
+    border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  tbody td{ padding:13px 20px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; white-space:nowrap; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr{ transition:background .12s ease; }
+  tbody tr:hover{ background:var(--surface-alt); }
+
+  .tenant-code{ font-family:var(--font-mono); font-size:12px; color:var(--primary-dark); font-weight:600; background:var(--primary-tint); padding:2px 8px; border-radius:6px; }
+  .biz-name{ font-weight:600; color:var(--ink); }
+  .biz-sub{ font-size:11px; color:var(--ink-faint); margin-top:1px; }
+  .user-name{ font-weight:700; color:var(--ink); }
+  .user-email{ color:var(--ink-soft); }
+  .table-state{ padding:18px 20px; color:var(--ink-soft); font-size:13px; font-weight:600; }
+  .table-state.error{ color:var(--red); }
+  .plan-chip{ font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:20px; background:var(--gold-tint); color:#1E3A8A; }
+
+  .status-badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:20px; }
+  .status-badge::before{ content:""; width:6px; height:6px; border-radius:50%; }
+  .status-active{ background:var(--green-tint); color:var(--green); }
+  .status-active::before{ background:var(--green); }
+  .status-trial{ background:var(--blue-tint); color:var(--blue); }
+  .status-trial::before{ background:var(--blue); }
+  .status-expired{ background:var(--red-tint); color:var(--red); }
+  .status-expired::before{ background:var(--red); }
+  .status-suspended{ background:var(--orange-tint); color:var(--orange); }
+  .status-suspended::before{ background:var(--orange); }
+
+  .row-actions{ display:flex; gap:6px; }
+  .act-btn{
+    width:28px; height:28px; border-radius:7px; border:1px solid var(--line); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+  }
+  .act-btn svg{ width:14px; height:14px; }
+  .act-btn:hover{ border-color:var(--primary-tint-2); background:var(--primary-tint); color:var(--primary-dark); }
+  .act-btn.danger:hover{ border-color:#FBBF24; background:var(--red-tint); color:var(--red); }
+
+  /* ---------- Charts ---------- */
+  .chart-legend{ display:flex; gap:16px; padding:0 20px 4px; flex-wrap:wrap; }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); font-weight:500; }
+  .legend-dot{ width:9px; height:9px; border-radius:3px; }
+
+  .bar-chart{
+    display:flex; align-items:flex-end; gap:14px; height:220px; padding:24px 20px 8px;
+  }
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end; }
+  .bar-stack{ width:100%; max-width:34px; display:flex; flex-direction:column-reverse; border-radius:6px 6px 3px 3px; overflow:hidden; box-shadow:var(--shadow-sm); }
+  .bar-seg{ width:100%; }
+  .bar-seg.rev{ background:linear-gradient(180deg, #3B82F6, var(--primary)); }
+  .bar-seg.target{ background:var(--primary-tint-2); }
+  .bar-month{ font-size:11px; color:var(--ink-faint); font-weight:600; }
+  .bar-col:hover .bar-stack{ filter:brightness(1.06); transform:scaleY(1.01); }
+
+  .line-chart-wrap{ padding:20px; }
+  .line-chart{ width:100%; height:200px; display:block; }
+
+  /* ---------- System health ---------- */
+  .health-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:20px; }
+  .health-card{ border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; background:var(--surface-alt); }
+  .health-top{ display:flex; align-items:center; justify-content:between; gap:8px; margin-bottom:10px; }
+  .health-dot-row{ display:flex; align-items:center; gap:7px; }
+  .pulse-dot{ width:9px; height:9px; border-radius:50%; background:var(--green); position:relative; }
+  .pulse-dot::after{
+    content:""; position:absolute; inset:-4px; border-radius:50%; border:2px solid var(--green);
+    animation:pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse{ 0%{ transform:scale(0.6); opacity:.8;} 100%{ transform:scale(1.8); opacity:0; } }
+  .health-label{ font-size:12px; font-weight:600; color:var(--ink-soft); }
+  .health-value{ font-family:var(--font-display); font-size:19px; font-weight:700; margin-top:6px; }
+  .health-sub{ font-size:11px; color:var(--ink-faint); margin-top:3px; }
+
+  /* ---------- Activity + quick actions ---------- */
+  .activity-list{ padding:8px 12px 12px; }
+  .activity-item{ display:flex; gap:12px; padding:12px 8px; border-radius:10px; }
+  .activity-item:hover{ background:var(--surface-alt); }
+  .act-dot{ width:34px; height:34px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .act-dot svg{ width:16px; height:16px; }
+  .activity-text{ font-size:13px; color:var(--ink); font-weight:500; line-height:1.4; }
+  .activity-text b{ font-weight:700; }
+  .activity-time{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+
+  .quick-actions{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:20px; }
+  .qa-btn{
+    display:flex; flex-direction:column; gap:10px; align-items:flex-start;
+    border:1px solid var(--line); border-radius:var(--radius-md); padding:16px;
+    background:var(--surface-alt);
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .qa-btn:hover{ border-color:var(--primary-tint-2); background:var(--primary-tint); transform:translateY(-2px); }
+  .qa-icon{ width:34px; height:34px; border-radius:9px; background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--primary-dark); }
+  .qa-icon svg{ width:16px; height:16px; }
+  .qa-title{ font-size:13px; font-weight:700; color:var(--ink); }
+  .qa-sub{ font-size:11px; color:var(--ink-faint); }
+
+  /* ---------- Footer ---------- */
+  .footer{
+    text-align:center; padding:26px 20px 10px; color:var(--ink-faint); font-size:12px;
+  }
+  .footer .foot-brand{ font-family:var(--font-display); font-weight:700; color:var(--ink-soft); margin-bottom:3px; }
+  .footer .ver-chip{ font-family:var(--font-mono); font-size:10.5px; background:var(--surface-alt); border:1px solid var(--line); padding:2px 7px; border-radius:6px; margin:0 4px; }
+
+  .sidebar-overlay{ display:none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1240px){
+    .stat-grid{ grid-template-columns:repeat(3,1fr); }
+    .two-col{ grid-template-columns:1fr; }
+    .grid-4{ grid-template-columns:repeat(2,1fr); }
+    .health-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width: 900px){
+    :root{ --sidebar-w:250px; }
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-lg); }
+    .sidebar.open{ transform:translateX(0); }
+    .main{ margin-left:0; }
+    .menu-toggle{ display:flex; }
+    .search-box{ width:200px; }
+    .stat-grid{ grid-template-columns:repeat(2,1fr); }
+    .quick-actions{ grid-template-columns:1fr; }
+    .sidebar-overlay{
+      display:block; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:55;
+      opacity:0; pointer-events:none; transition:opacity .2s ease;
+    }
+    .sidebar-overlay.show{ opacity:1; pointer-events:auto; }
+  }
+  @media (max-width: 620px){
+    .stat-grid{ grid-template-columns:1fr 1fr; }
+    .grid-4{ grid-template-columns:1fr; }
+    .health-grid{ grid-template-columns:1fr 1fr; }
+    .content{ padding:18px 14px 40px; }
+    .profile-meta{ display:none; }
+    .page-head{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar-overlay" id="overlay"></div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div>
+        <div class="brand-name">payrollly</div>
+        <div class="brand-sub">WORKFORCE OS</div>
+      </div>
+    </div>
+
+    <nav class="nav-scroll">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item active" href="#dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+        Dashboard
+      </a>
+
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="#tenants">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5Z"/></svg>
+        Tenants
+      </a>
+      <a class="nav-item" href="#businesses">
+        <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2Zm-6 0h-4V4h4v2Z"/></svg>
+        Businesses
+      </a>
+      <a class="nav-item" href="/admin/users" target="_parent">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+        Users
+      </a>
+
+      <div class="nav-section-label">Revenue</div>
+      <a class="nav-item" href="#subscriptions">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2Zm0 14H4v-6h16v6Zm0-10H4V6h16v2Z"/></svg>
+        Subscriptions
+      </a>
+      <a class="nav-item" href="#revenue">
+        <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2Zm5.5-4.2h3v14h-3V5ZM16 13h3v6h-3v-6Z"/></svg>
+        Revenue
+      </a>
+      <a class="nav-item" href="#reports">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6Zm-1 7V3.5L18.5 9H13Zm3 5H8v-2h8v2Zm0 4H8v-2h8v2Z"/></svg>
+        Reports
+      </a>
+
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="#settings">
+        <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.37-.31-.6-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98L14.5 2.42C14.47 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42L9.12 5.07c-.61.25-1.18.59-1.69.98l-2.49-1c-.23-.08-.48 0-.6.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.37.31.6.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .47-.18.5-.42l.38-2.65c.61-.25 1.18-.58 1.69-.98l2.49 1c.23.08.48 0 .6-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search tenants, businesses, employees…" />
+        <span class="kbd-hint">⌘K</span>
+      </div>
+
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="ping-dot"></span>
+        </button>
+        <button class="icon-btn" aria-label="Messages">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">RP</div>
+          <div class="profile-meta">
+            <div class="profile-name">Roshan Priyan</div>
+            <div class="profile-role">Super Admin</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content" id="dashboard">
+
+      <div class="page-head">
+        <div>
+          <h1>Overview</h1>
+          <p>Platform-wide snapshot across every tenant on PayrollPro · Saturday, 8 August 2026</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Add Tenant
+          </button>
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STAT CARDS ===== -->
+      <section class="stat-grid" aria-label="Key statistics">
+        <div class="stat-card" style="--stripe:#2563EB;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:rgba(37,99,235,0.05); --stat-color:#2563EB;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>
+            </div>
+            <span class="stat-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg>8.4%</span>
+          </div>
+          <div class="stat-value">248</div>
+          <div class="stat-label">Total Tenants</div>
+        </div>
+
+        <div class="stat-card" style="--stripe:#16A34A;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:#4ADE80; --stat-color:#16A34A;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span class="stat-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg>5.1%</span>
+          </div>
+          <div class="stat-value">211</div>
+          <div class="stat-label">Active Tenants</div>
+        </div>
+
+        <div class="stat-card" style="--stripe:#F59E0B;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:#FBBF24; --stat-color:#F59E0B;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+            </div>
+            <span class="stat-trend down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>2.3%</span>
+          </div>
+          <div class="stat-value">21</div>
+          <div class="stat-label">Expired Tenants</div>
+        </div>
+
+        <div class="stat-card" style="--stripe:#2563EB;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:rgba(37,99,235,0.05); --stat-color:#2563EB;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <span class="stat-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg>4.7%</span>
+          </div>
+          <div class="stat-value">312</div>
+          <div class="stat-label">Total Businesses</div>
+        </div>
+
+        <div class="stat-card" style="--stripe:#3B82F6;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:rgba(37,99,235,0.05); --stat-color:#1E3A8A;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-3.6 3.8-5.6 6.5-5.6s5.5 2 6.5 5.6"/><circle cx="18" cy="7" r="2.4"/><path d="M15.7 14.6c2.1.3 3.9 2 4.8 5"/></svg>
+            </div>
+            <span class="stat-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg>11.2%</span>
+          </div>
+          <div class="stat-value">18,642</div>
+          <div class="stat-label">Total Employees</div>
+        </div>
+
+        <div class="stat-card" style="--stripe:#2563EB;">
+          <div class="stat-top">
+            <div class="stat-icon" style="--stat-tint:rgba(37,99,235,0.05); --stat-color:#2563EB;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9m6.5 10V4M17 19v-6"/></svg>
+            </div>
+            <span class="stat-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg>14.6%</span>
+          </div>
+          <div class="stat-value">₹42.8L</div>
+          <div class="stat-label">Monthly Revenue</div>
+        </div>
+      </section>
+
+      <!-- ===== TENANT TABLE ===== -->
+      <section class="section-card" id="tenants">
+        <div class="section-head">
+          <div>
+            <h2>Recent Tenant Registrations</h2>
+            <div class="sub">Latest 10 tenants onboarded across the platform</div>
+          </div>
+          <a class="link-btn" href="#">
+            View all tenants
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tenant Code</th>
+                <th>Business Name</th>
+                <th>Admin Name</th>
+                <th>Plan</th>
+                <th>Employees</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tenantTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== SUBSCRIPTION MONITORING ===== -->
+      <section class="section-card" id="subscriptions">
+        <div class="section-head">
+          <div>
+            <h2>Subscription Monitoring</h2>
+            <div class="sub">Live breakdown of every plan tier on the platform</div>
+          </div>
+        </div>
+        <div class="grid-4">
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-icon" style="background:var(--blue-tint); color:var(--blue);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+              </div>
+              <div class="mini-label">Free Trial Users</div>
+            </div>
+            <div class="mini-value">64</div>
+            <div class="mini-bar"><span style="width:26%; background:var(--blue);"></span></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-icon" style="background:var(--primary-tint); color:var(--primary-dark);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.2"/><path d="M2.5 10h19"/></svg>
+              </div>
+              <div class="mini-label">Standard Plan Users</div>
+            </div>
+            <div class="mini-value">147</div>
+            <div class="mini-bar"><span style="width:63%; background:var(--primary);"></span></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-icon" style="background:var(--orange-tint); color:var(--orange);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </div>
+              <div class="mini-label">Expiring This Week</div>
+            </div>
+            <div class="mini-value">16</div>
+            <div class="mini-bar"><span style="width:20%; background:var(--orange);"></span></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-icon" style="background:var(--red-tint); color:var(--red);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+              </div>
+              <div class="mini-label">Expired Accounts</div>
+            </div>
+            <div class="mini-value">21</div>
+            <div class="mini-bar"><span style="width:14%; background:var(--red);"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== REVENUE ANALYTICS ===== -->
+      <section class="two-col" id="revenue">
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>Monthly Revenue</h2>
+              <div class="sub">Collected revenue vs. target, last 8 months</div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--primary);"></span>Revenue collected</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--primary-tint-2);"></span>Monthly target</div>
+          </div>
+          <div class="bar-chart" id="barChart"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <h2>Tenant Growth</h2>
+              <div class="sub">New tenant sign-ups per month</div>
+            </div>
+          </div>
+          <div class="line-chart-wrap">
+            <svg class="line-chart" id="lineChart" viewBox="0 0 480 200" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SYSTEM HEALTH ===== -->
+      <section class="section-card">
+        <div class="section-head">
+          <div>
+            <h2>System Health</h2>
+            <div class="sub">Live infrastructure status</div>
+          </div>
+          <span class="status-badge status-active">All systems operational</span>
+        </div>
+        <div class="health-grid">
+          <div class="health-card">
+            <div class="health-dot-row"><span class="pulse-dot"></span><span class="health-label">API Requests Today</span></div>
+            <div class="health-value">1,84,320</div>
+            <div class="health-sub">Avg. response 118ms</div>
+          </div>
+          <div class="health-card">
+            <div class="health-dot-row"><span class="pulse-dot"></span><span class="health-label">Active Sessions</span></div>
+            <div class="health-value">3,412</div>
+            <div class="health-sub">Peak today: 4,096</div>
+          </div>
+          <div class="health-card">
+            <div class="health-dot-row"><span class="pulse-dot"></span><span class="health-label">Database Status</span></div>
+            <div class="health-value">Healthy</div>
+            <div class="health-sub">Primary + 2 replicas synced</div>
+          </div>
+          <div class="health-card">
+            <div class="health-dot-row"><span class="pulse-dot"></span><span class="health-label">Server Uptime</span></div>
+            <div class="health-value">99.98%</div>
+            <div class="health-sub">Last 90 days</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ACTIVITY + QUICK ACTIONS ===== -->
+      <section class="grid-2" style="margin-bottom:24px;">
+        <div class="section-card" style="margin-bottom:0;">
+          <div class="section-head">
+            <div>
+              <h2>Recent Activities</h2>
+              <div class="sub">Platform-wide event stream</div>
+            </div>
+          </div>
+          <div class="activity-list" id="activityList"></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom:0;">
+          <div class="section-head">
+            <div>
+              <h2>Quick Actions</h2>
+              <div class="sub">Common super admin tasks</div>
+            </div>
+          </div>
+          <div class="quick-actions">
+            <button class="qa-btn">
+              <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M12 11v6M9 14h6"/></svg></div>
+              <div><div class="qa-title">Add Tenant</div><div class="qa-sub">Onboard a new organisation</div></div>
+            </button>
+            <button class="qa-btn">
+              <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+              <div><div class="qa-title">Extend Subscription</div><div class="qa-sub">Add days to any plan</div></div>
+            </button>
+            <button class="qa-btn">
+              <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.2-4 4.3-6 8-6s6.8 2 8 6"/><path d="M19 8h3M20.5 6.5v3"/></svg></div>
+              <div><div class="qa-title">Create Super Admin</div><div class="qa-sub">Grant platform-level access</div></div>
+            </button>
+            <button class="qa-btn">
+              <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></div>
+              <div><div class="qa-title">Export Report</div><div class="qa-sub">Download platform CSV/PDF</div></div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="foot-brand">PayrollPro Admin Console</div>
+        <div><span class="ver-chip">v1.0.0</span> © 2026 PayrollPro Technologies Pvt. Ltd. All rights reserved.</div>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Sidebar toggle (mobile) ---------------- */
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const menuToggle = document.getElementById('menuToggle');
+
+  function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e){
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      this.classList.add('active');
+      closeSidebar();
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    ['access_token', 'role', 'user_id', 'first_name', 'last_name'].forEach(key => localStorage.removeItem(key));
+    window.parent.location.href = '/admin/login';
+  });
+
+  /* ---------------- Currency formatter (INR) ---------------- */
+  function formatINR(num){
+    return '₹' + Number(num).toLocaleString('en-IN');
+  }
+
+  /* ---------------- Tenant sample data ---------------- */
+  const tenants = [
+    { code:'TNT-1042', biz:'Suryaa Textiles Pvt Ltd', bizSub:'Coimbatore, TN', admin:'Karthik Subramaniam', plan:'Enterprise', emp:642, expiry:'12 Feb 2027', status:'active' },
+    { code:'TNT-1041', biz:'BlueOrbit Software Solutions', bizSub:'Bengaluru, KA', admin:'Ananya Rao', plan:'Standard', emp:128, expiry:'28 Aug 2026', status:'trial' },
+    { code:'TNT-1039', biz:'Meridian Logistics Group', bizSub:'Chennai, TN', admin:'Vishal Menon', plan:'Growth', emp:315, expiry:'03 Sep 2026', status:'active' },
+    { code:'TNT-1037', biz:'Kaveri Foods & Beverages', bizSub:'Mysuru, KA', admin:'Deepa Ramachandran', plan:'Standard', emp:96, expiry:'19 Jul 2026', status:'expired' },
+    { code:'TNT-1035', biz:'NovaTech Automation Ltd', bizSub:'Pune, MH', admin:'Rohan Deshmukh', plan:'Enterprise', emp:874, expiry:'30 Nov 2026', status:'active' },
+    { code:'TNT-1033', biz:'Everest Construction Co.', bizSub:'Gurugram, HR', admin:'Simran Kaur', plan:'Growth', emp:412, expiry:'22 Aug 2026', status:'suspended' },
+    { code:'TNT-1031', biz:'Lotus Healthcare Systems', bizSub:'Hyderabad, TS', admin:'Priya Nair', plan:'Standard', emp:203, expiry:'14 Oct 2026', status:'active' },
+    { code:'TNT-1029', biz:'Coastal Freight & Marine', bizSub:'Visakhapatnam, AP', admin:'Arjun Reddy', plan:'Standard', emp:64, expiry:'05 Aug 2026', status:'trial' },
+    { code:'TNT-1027', biz:'Zenith Retail Ventures', bizSub:'Ahmedabad, GJ', admin:'Meera Shah', plan:'Enterprise', emp:951, expiry:'17 Jan 2027', status:'active' },
+    { code:'TNT-1024', biz:'Himalaya Consulting Group', bizSub:'New Delhi, DL', admin:'Aditya Verma', plan:'Growth', emp:178, expiry:'02 Jul 2026', status:'expired' }
+  ];
+
+  const statusLabel = { active:'Active', trial:'Trial', expired:'Expired', suspended:'Suspended' };
+
+  const tbody = document.getElementById('tenantTableBody');
+  tbody.innerHTML = tenants.map(t => `
+    <tr>
+      <td><span class="tenant-code">${t.code}</span></td>
+      <td>
+        <div class="biz-name">${t.biz}</div>
+        <div class="biz-sub">${t.bizSub}</div>
+      </td>
+      <td>${t.admin}</td>
+      <td><span class="plan-chip">${t.plan}</span></td>
+      <td>${t.emp.toLocaleString('en-IN')}</td>
+      <td>${t.expiry}</td>
+      <td><span class="status-badge status-${t.status}">${statusLabel[t.status]}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="act-btn" title="View" aria-label="View ${t.biz}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="act-btn" title="Edit" aria-label="Edit ${t.biz}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          </button>
+          <button class="act-btn danger" title="Suspend" aria-label="Suspend ${t.biz}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('.act-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const action = this.getAttribute('title');
+      const row = this.closest('tr');
+      const name = row.querySelector('.biz-name').textContent;
+      if(action === 'Suspend'){
+        const badge = row.querySelector('.status-badge');
+        badge.className = 'status-badge status-suspended';
+        badge.textContent = 'Suspended';
+      } else {
+        console.log(action + ' clicked for ' + name);
+      }
+    });
+  });
+
+  /* ---------------- Monthly Revenue bar chart ---------------- */
+  const revenueData = [
+    { m:'Jan', rev:31.2, target:34 },
+    { m:'Feb', rev:33.6, target:34 },
+    { m:'Mar', rev:29.8, target:35 },
+    { m:'Apr', rev:36.4, target:36 },
+    { m:'May', rev:38.1, target:37 },
+    { m:'Jun', rev:35.7, target:38 },
+    { m:'Jul', rev:40.3, target:39 },
+    { m:'Aug', rev:42.8, target:40 }
+  ];
+  const maxVal = Math.max(...revenueData.map(d => Math.max(d.rev, d.target))) * 1.15;
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = revenueData.map(d => {
+    const revH = (d.rev / maxVal) * 100;
+    const targetH = (d.target / maxVal) * 100;
+    const stackH = Math.max(revH, targetH);
+    const revPct = (revH / stackH) * 100;
+    const targetPct = 100 - revPct;
+    return `
+      <div class="bar-col" title="${d.m}: ${formatINR(d.rev)}L revenue vs ${formatINR(d.target)}L target">
+        <div class="bar-stack" style="height:${stackH}%;">
+          <div class="bar-seg target" style="height:${targetPct}%;"></div>
+          <div class="bar-seg rev" style="height:${revPct}%;"></div>
+        </div>
+        <div class="bar-month">${d.m}</div>
+      </div>
+    `;
+  }).join('');
+
+  /* ---------------- Tenant Growth line chart (SVG) ---------------- */
+  const growthData = [12, 18, 15, 24, 21, 29, 26, 34, 31, 38, 35, 44];
+  const growthMonths = ['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
+  const svg = document.getElementById('lineChart');
+  const W = 480, H = 200, padX = 8, padY = 18;
+  const gMax = Math.max(...growthData) * 1.15;
+  const gMin = 0;
+  const stepX = (W - padX*2) / (growthData.length - 1);
+
+  function xy(i, v){
+    const x = padX + i * stepX;
+    const y = H - padY - ((v - gMin) / (gMax - gMin)) * (H - padY*2);
+    return [x, y];
+  }
+
+  let pathD = '';
+  let areaD = '';
+  growthData.forEach((v, i) => {
+    const [x, y] = xy(i, v);
+    pathD += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+  });
+  const [firstX] = xy(0, growthData[0]);
+  const [lastX] = xy(growthData.length - 1, growthData[growthData.length - 1]);
+  areaD = `M ${firstX} ${H - padY} L ` + growthData.map((v,i)=>{ const [x,y]=xy(i,v); return `${x} ${y}`; }).join(' L ') + ` L ${lastX} ${H - padY} Z`;
+
+  let gridLines = '';
+  for(let i=0;i<=3;i++){
+    const y = padY + (i * (H - padY*2) / 3);
+    gridLines += `<line x1="${padX}" y1="${y}" x2="${W-padX}" y2="${y}" stroke="rgba(15,23,42,0.08)" stroke-width="1" />`;
+  }
+
+  let dots = '';
+  let labels = '';
+  growthData.forEach((v,i) => {
+    const [x,y] = xy(i,v);
+    dots += `<circle cx="${x}" cy="${y}" r="3.4" fill="#2563EB" stroke="#fff" stroke-width="1.5"><title>${growthMonths[i]}: ${v} new tenants</title></circle>`;
+    if(i % 2 === 0 || i === growthData.length-1){
+      labels += `<text x="${x}" y="${H-2}" font-size="9" fill="#94A3B8" text-anchor="middle" font-family="Inter, sans-serif">${growthMonths[i]}</text>`;
+    }
+  });
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2563EB" stop-opacity="0.22" />
+        <stop offset="100%" stop-color="#2563EB" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    <path d="${areaD}" fill="url(#areaFill)" />
+    <path d="${pathD}" fill="none" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+    ${dots}
+    ${labels}
+  `;
+
+  /* ---------------- Recent activity feed ---------------- */
+  const activities = [
+    { type:'new', text:'<b>Suryaa Textiles Pvt Ltd</b> registered as a new tenant', time:'6 minutes ago' },
+    { type:'renew', text:'<b>Lotus Healthcare Systems</b> renewed their Standard subscription', time:'24 minutes ago' },
+    { type:'suspend', text:'<b>Everest Construction Co.</b> was suspended for non-payment', time:'1 hour ago' },
+    { type:'emp', text:'42 new employees added under <b>NovaTech Automation Ltd</b>', time:'2 hours ago' },
+    { type:'payroll', text:'Payroll generated for <b>Zenith Retail Ventures</b> — 951 employees', time:'3 hours ago' },
+    { type:'new', text:'<b>BlueOrbit Software Solutions</b> started a free trial', time:'5 hours ago' },
+    { type:'renew', text:'<b>Meridian Logistics Group</b> upgraded to the Growth plan', time:'Yesterday, 6:48 PM' }
+  ];
+  const activityIcons = {
+    new:    { bg:'var(--primary-tint)', color:'var(--primary-dark)', svg:'<path d="M3 21V8l9-5 9 5v13"/><path d="M12 11v6M9 14h6"/>' },
+    renew:  { bg:'var(--green-tint)', color:'var(--green)', svg:'<circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>' },
+    suspend:{ bg:'var(--orange-tint)', color:'var(--orange)', svg:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6"/>' },
+    emp:    { bg:'var(--blue-tint)', color:'var(--blue)', svg:'<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-3.6 3.8-5.6 6.5-5.6s5.5 2 6.5 5.6"/>' },
+    payroll:{ bg:'var(--gold-tint)', color:'#1E3A8A', svg:'<rect x="2.5" y="5" width="19" height="14" rx="2.2"/><path d="M2.5 10h19"/>' }
+  };
+  document.getElementById('activityList').innerHTML = activities.map(a => {
+    const ic = activityIcons[a.type];
+    return `
+      <div class="activity-item">
+        <div class="act-dot" style="background:${ic.bg}; color:${ic.color};">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${ic.svg}</svg>
+        </div>
+        <div>
+          <div class="activity-text">${a.text}</div>
+          <div class="activity-time">${a.time}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  /* ---------------- Quick action buttons ---------------- */
+  document.querySelectorAll('.qa-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const title = this.querySelector('.qa-title').textContent;
+      alert(title + ' — this would open the ' + title.toLowerCase() + ' workflow.');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

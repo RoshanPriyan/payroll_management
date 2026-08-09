@@ -1,0 +1,58 @@
+.adminLoginPage{
+  min-height:100vh;
+}
+
+.adminLoginPage>.landing-page{
+  min-height:100vh;
+}
+
+.adminLoginModalLayer{
+  position:relative;
+  z-index:2100;
+}
+
+.landing-page .adminLoginBackdrop{
+  background:rgba(2,6,23,.56);
+  backdrop-filter:blur(3px);
+}
+
+.landing-page .adminLoginSubtitle{
+  margin:0 0 .25rem;
+  color:var(--text-muted);
+  font-weight:700;
+  text-align:center;
+}
+
+.landing-page .adminPasswordField{
+  position:relative;
+}
+
+.landing-page .adminPasswordField .form-control-custom{
+  padding-right:3rem;
+}
+
+.landing-page .adminPasswordToggle{
+  position:absolute;
+  top:50%;
+  right:.65rem;
+  transform:translateY(-50%);
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:var(--text-muted);
+  cursor:pointer;
+}
+
+.landing-page .adminPasswordToggle:hover{
+  color:var(--primary);
+  background:rgba(37,99,235,.08);
+}
+
+.landing-page .adminPasswordToggle:disabled{
+  cursor:not-allowed;
+  opacity:.55;
+}

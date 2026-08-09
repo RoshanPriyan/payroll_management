@@ -1,0 +1,54 @@
+.adminUsersShell{min-height:100vh;background:#f8fafc;color:#0f172a;display:flex;font-family:'Inter',system-ui,sans-serif}
+.adminUsersSidebar{width:264px;flex-shrink:0;background:linear-gradient(185deg,#0f172a 0%,#1e3a8a 55%,#2563eb 130%);color:#f1f5f9;position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column}
+.adminUsersBrand{display:flex;align-items:center;gap:10px;padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.09);color:#fff}
+.adminUsersBrandMark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px}
+.adminUsersBrand b{display:block;font-size:16.5px;font-weight:800}
+.adminUsersBrand p{font-size:10.5px;color:#94a3b8;letter-spacing:.6px;text-transform:uppercase;margin:1px 0 0}
+.adminUsersNav{flex:1;overflow-y:auto;padding:16px 12px 12px}
+.adminUsersNavLabel{font-size:10.5px!important;text-transform:uppercase;letter-spacing:.8px!important;color:#94a3b8!important;padding:14px 12px 6px;font-weight:700!important}
+.adminUsersNavLink{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#f1f5f9;text-decoration:none;font-size:13.5px;font-weight:600;margin-bottom:2px;transition:background .15s ease,color .15s ease}
+.adminUsersNavLink svg{font-size:20px;fill:currentColor}
+.adminUsersNavLink:hover,.adminUsersNavLink.active{background:rgba(255,255,255,.13);color:#fff;box-shadow:inset 3px 0 0 #3b82f6}
+.adminUsersSidebarFoot{padding:16px;border-top:1px solid rgba(255,255,255,.09)}
+.adminUsersSidebarFoot .MuiButton-root{justify-content:flex-start;color:#f1f5f9;border-radius:10px;text-transform:none;font-weight:700}
+.adminUsersMain{margin-left:264px;flex:1;min-width:0;display:flex;flex-direction:column}
+.adminUsersTopbar{height:68px;background:rgba(255,255,255,.7);border-bottom:1px solid rgba(15,23,42,.08);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:10}
+.adminUsersTitle{font-size:19px!important;font-weight:800!important;color:#1e293b}
+.adminUsersProfileChip{margin-left:auto;display:flex;align-items:center;gap:10px;padding:5px 12px 5px 6px;border-radius:30px;border:1px solid rgba(15,23,42,.08);background:rgba(248,250,252,.75)}
+.adminUsersAvatar{width:32px!important;height:32px!important;background:linear-gradient(135deg,#2563eb,#3b82f6)!important;color:#fff!important;font-size:13px!important;font-weight:800!important}
+.adminUsersProfileMeta{line-height:1.25}
+.adminUsersProfileName{font-size:12.5px;font-weight:800;color:#0f172a}
+.adminUsersProfileRole{font-size:10.5px;color:#94a3b8;font-weight:600}
+.adminUsersContent{padding:26px 28px 60px;max-width:1440px;width:100%;margin:0 auto}
+.adminUsersPageHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.adminUsersPageHead h1{font-size:23px;font-weight:800;margin:0;color:#0f172a}
+.adminUsersPageHead p{color:#64748b;font-size:13px;margin:3px 0 0}
+.adminUsersSection{background:rgba(255,255,255,.7);border:1px solid rgba(15,23,42,.08);border-radius:16px;box-shadow:0 1px 2px rgba(18,32,25,.04),0 1px 1px rgba(18,32,25,.03)}
+.adminUsersSectionHead{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(15,23,42,.08)}
+.adminUsersSectionHead h2{font-size:15.5px;font-weight:800;margin:0}
+.adminUsersSectionHead div div{font-size:12px;color:#94a3b8;margin-top:2px;font-weight:600}
+.adminUsersAlert{margin:16px 20px 0}
+.adminUsersTableWrap{overflow-x:auto}
+.adminUsersTable{width:100%;min-width:900px;border-collapse:collapse}
+.adminUsersTable th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;font-weight:800;padding:12px 20px;background:rgba(248,250,252,.75);border-bottom:1px solid rgba(15,23,42,.08);white-space:nowrap}
+.adminUsersTable td{padding:13px 20px;border-bottom:1px solid rgba(15,23,42,.08);font-size:13px;vertical-align:middle;white-space:nowrap}
+.adminUsersTable tbody tr:last-child td{border-bottom:0}
+.adminUsersTable tbody tr:hover{background:rgba(248,250,252,.75)}
+.adminUsersCode{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1e3a8a;font-weight:700;background:rgba(37,99,235,.05);padding:2px 8px;border-radius:6px}
+.adminUsersEmail{color:#64748b}
+.adminUsersStatus{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;background:#4ade80;color:#16a34a}
+.adminUsersStatus::before{content:"";width:6px;height:6px;border-radius:50%;background:#16a34a}
+.adminUsersStatusInactive{background:#fbbf24;color:#f59e0b}
+.adminUsersStatusInactive::before{background:#f59e0b}
+.adminUsersStatusControl{display:inline-flex;align-items:center;gap:8px;color:#64748b;font-size:12px;font-weight:800;min-width:92px}
+.adminUsersStatusControl .MuiSwitch-root{width:42px;height:26px;padding:0}
+.adminUsersStatusControl .MuiSwitch-switchBase{padding:3px}
+.adminUsersStatusControl .MuiSwitch-thumb{width:20px;height:20px;box-shadow:0 1px 3px rgba(15,23,42,.22)}
+.adminUsersStatusControl .MuiSwitch-track{border-radius:20px;background:#cbd5e1;opacity:1}
+.adminUsersStatusControl .MuiSwitch-switchBase.Mui-checked{transform:translateX(16px);color:#fff}
+.adminUsersStatusControl .MuiSwitch-switchBase.Mui-checked+.MuiSwitch-track{background:#2563eb;opacity:1}
+.adminUsersState{display:flex;align-items:center;gap:8px;padding:18px 0;color:#64748b;font-size:13px;font-weight:700}
+.adminUsersRegisterModalLayer{position:fixed;inset:0;z-index:2100;min-height:0;background:transparent;overflow:visible;pointer-events:none}
+.landing-page .adminUsersRegisterBackdrop{pointer-events:auto;background:rgba(2,6,23,.56);backdrop-filter:blur(3px)}
+.landing-page .adminUsersAuthWide{grid-column:1/-1}
+@media(max-width:900px){.adminUsersSidebar{position:static;width:100%;height:auto}.adminUsersShell{display:block}.adminUsersMain{margin-left:0}.adminUsersTopbar{padding:0 18px}.adminUsersProfileMeta{display:none}.adminUsersContent{padding:20px 18px 44px}}
