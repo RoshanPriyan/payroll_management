@@ -30,15 +30,24 @@
 .dashboardPage{display:flex;flex-direction:column;gap:26px;background:#f8fafc;color:#1e293b;font-variant-numeric:tabular-nums}
 .dashCard{border:1px solid #e7ecf3!important;border-radius:20px!important;box-shadow:0 6px 20px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04)!important;overflow:hidden}
 .dashCard .MuiCardContent-root{padding:24px}
-.welcomeCard{background:linear-gradient(135deg,#fff 55%,#eff3ff 130%)!important}
-.welcomeCard .MuiCardContent-root{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:34px 40px}
+.welcomeCard{background:linear-gradient(110deg,#fff 0%,#f8fbff 54%,#eef4ff 100%)!important;border-radius:16px!important;position:relative}
+.welcomeCard::after{content:"";position:absolute;inset:0 0 0 auto;width:42%;background:radial-gradient(circle at 45% 28%,rgba(219,234,254,.7),transparent 32%),linear-gradient(135deg,transparent 8%,rgba(199,210,254,.45));pointer-events:none}
+.welcomeCard .MuiCardContent-root{min-height:195px;display:grid;grid-template-columns:minmax(0,1fr) 390px;align-items:center;gap:22px;padding:26px 34px;position:relative;z-index:1}
 .eyebrow{font-size:12px!important;font-weight:800!important;text-transform:uppercase;letter-spacing:.08em!important;color:#2563eb;margin-bottom:8px!important}
-.welcomeText h4{font-weight:800;color:#1e293b;margin-bottom:8px}
-.welcomeSub{color:#64748b;font-size:14.5px!important;margin-bottom:14px!important}
-.welcomeSummary{display:inline-block;background:#fff;border:1px solid #e7ecf3;border-radius:11px;padding:10px 16px;margin-bottom:20px!important;color:#1e293b;font-size:14.5px!important}
-.welcomeSummary b{color:#2563eb}
-.welcomeArt{width:300px;flex-shrink:0}
-.payCardArt{display:block;width:100%;height:auto}
+.welcomeText{min-width:0}
+.welcomeText h4{font-size:26px!important;line-height:1.18!important;font-weight:900!important;color:#0f172a;margin-bottom:10px!important;letter-spacing:0!important}
+.welcomeDate{display:flex;align-items:center;gap:8px;color:#64748b;font-size:13px!important;font-weight:700!important;margin-bottom:34px!important}
+.welcomeDate svg{font-size:17px;color:#64748b}
+.welcomeStats{display:grid;grid-template-columns:repeat(5,minmax(100px,1fr));align-items:center;max-width:690px}
+.welcomeStat{min-width:0;display:flex;align-items:center;gap:12px;padding:0 22px;border-left:1px solid #e7ecf3}
+.welcomeStat:first-child{border-left:0;padding-left:0}
+.welcomeStatIcon{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.welcomeStatIcon svg{font-size:20px}.welcomeStatIcon i{width:10px;height:10px;border-radius:50%;display:block}
+.welcomeStatIcon.slate{background:#eef2f7;color:#94a3b8}.welcomeStatIcon.green{background:#dff8eb}.welcomeStatIcon.green i{background:#10b981}.welcomeStatIcon.red{background:#fee2e2}.welcomeStatIcon.red i{background:#ef4444}.welcomeStatIcon.amber{background:#fff3db}.welcomeStatIcon.amber i{background:#f59e0b}.welcomeStatIcon.purple{background:#f3e8ff}.welcomeStatIcon.purple i{background:#9333ea}
+.welcomeStat b{display:block;color:#0f172a;font-size:22px;line-height:1;font-weight:900}
+.welcomeStat p{color:#64748b;font-size:13px!important;font-weight:700!important;margin-top:5px;white-space:nowrap}
+.welcomeArt{width:390px;justify-self:end;flex-shrink:0}
+.dashboardHeroArt{display:block;width:100%;height:auto}
 .coin{animation:float 3.4s ease-in-out infinite}.coinTwo{animation-delay:.6s}.coinThree{animation-delay:1.1s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .kpiGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
@@ -58,5 +67,6 @@
 .paymentList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.paymentList li{display:flex;align-items:center;gap:12px;padding:11px 6px;border-radius:11px}.paymentList li:hover{background:#f8fafc}.paymentMid{display:flex;flex-direction:column;gap:2px;min-width:0}.paymentMid b{font-size:13.8px}.paymentRight{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}.paymentRight b{font-size:14px;color:#1e293b}
 .widgetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.widgetLabel{font-size:12.5px!important;color:#64748b;font-weight:800!important;margin-bottom:8px!important}.widgetValue{font-size:22px!important;font-weight:800!important;color:#1e293b;margin-bottom:10px!important}.widgetSub{display:flex;align-items:center;gap:6px;font-size:12.5px!important;color:#64748b}.progress{height:7px;background:#f1f5f9;border-radius:20px;overflow:hidden;margin-bottom:10px}.progress span{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#10b981);border-radius:20px}.payChip{padding:7px 0}.payChip p{font-size:13px;font-weight:700;flex:1}.emptyDashboard{text-align:center}.emptyDashboard .MuiCardContent-root{display:flex;flex-direction:column;align-items:center;gap:10px;padding:38px 24px}.emptyDashboard svg{font-size:42px;color:#2563eb}
 @media(max-width:1200px){.analyticsGrid,.tablesGrid{grid-template-columns:1fr}.widgetGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:980px){.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.quickGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.welcomeCard .MuiCardContent-root{flex-direction:column;align-items:flex-start}.welcomeArt{width:100%;max-width:280px}}
-@media(max-width:600px){.dashboardPage{gap:18px}.welcomeCard .MuiCardContent-root,.dashCard .MuiCardContent-root{padding:20px}.welcomeText h4{font-size:24px}.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.quickGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quickCard{padding:14px 8px;font-size:12px}.quickIcon{width:38px;height:38px}.widgetGrid{grid-template-columns:1fr}.attendanceBars{height:210px}.barPair span{width:14px}}
+@media(max-width:1180px){.welcomeCard .MuiCardContent-root{grid-template-columns:1fr 300px}.welcomeArt{width:300px}.welcomeStats{grid-template-columns:repeat(3,minmax(120px,1fr));gap:18px 0}.welcomeStat:nth-child(4){border-left:0;padding-left:0}}
+@media(max-width:980px){.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.quickGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.welcomeCard .MuiCardContent-root{grid-template-columns:1fr}.welcomeCard::after{width:100%;opacity:.55}.welcomeArt{width:100%;max-width:320px;justify-self:start}.welcomeDate{margin-bottom:24px!important}.welcomeStats{max-width:none}}
+@media(max-width:600px){.dashboardPage{gap:18px}.welcomeCard .MuiCardContent-root,.dashCard .MuiCardContent-root{padding:20px}.welcomeText h4{font-size:22px!important}.welcomeStats{grid-template-columns:1fr 1fr;gap:16px 0}.welcomeStat{padding:0 12px}.welcomeStat:nth-child(odd){border-left:0;padding-left:0}.welcomeStat b{font-size:20px}.welcomeStat p{font-size:12px!important;white-space:normal}.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.quickGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quickCard{padding:14px 8px;font-size:12px}.quickIcon{width:38px;height:38px}.widgetGrid{grid-template-columns:1fr}.attendanceBars{height:210px}.barPair span{width:14px}}

@@ -1,9 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Avatar, Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
-import { Assessment, CalendarMonth, ChevronRight, Groups, Paid, Payments, PersonAdd, Wallet } from '@mui/icons-material';
+import { Assessment, CalendarMonth, Groups, Paid, Payments, PersonAdd, Wallet } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { workerApi } from '../../api/workerApi.js';
 import SectionHead from '../../components/common/SectionHead.jsx';
 
 const Sparkline = ({ points }) => <svg className="dashSpark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points={points} /></svg>;
+
+const attendanceSummaryFallback = {
+  total_workers: null,
+  present_count: null,
+  absent_count: null,
+  half_day_count: null,
+  leave_count: null,
+};
+
+function buildHeroStats(summary) {
+  return [
+    { label: 'Total Workers', value: summary.total_workers, tone: 'slate', icon: <Groups /> },
+    { label: 'Present Today', value: summary.present_count, tone: 'green' },
+    { label: 'Absent Today', value: summary.absent_count, tone: 'red' },
+    { label: 'Half Day', value: summary.half_day_count, tone: 'amber' },
+    { label: 'On Leave', value: summary.leave_count, tone: 'purple' },
+  ];
+}
+
+function formatStatValue(value) {
+  return value ?? '-';
+}
 
 function getUserInfo() {
   try {
@@ -23,6 +47,14 @@ function getDashboardDate() {
   };
 }
 
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+}
+
 const DashboardKpi = ({ tone, icon, value, label, trend, points }) => (
   <Card className={`dashCard kpiCard ${tone}`}>
     <CardContent>
@@ -37,33 +69,59 @@ const DashboardKpi = ({ tone, icon, value, label, trend, points }) => (
   </Card>
 );
 
-function PayCardArt() {
+function DashboardHeroArt() {
   return (
-    <svg viewBox="0 0 320 220" className="payCardArt" aria-hidden="true">
+    <svg viewBox="0 0 360 160" className="dashboardHeroArt" aria-hidden="true">
       <defs>
-        <linearGradient id="dashCardGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#3B82F6" />
+        <linearGradient id="heroCardTop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#2563EB" />
           <stop offset="1" stopColor="#1D4ED8" />
         </linearGradient>
-        <linearGradient id="dashWaveGradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#2563EB" stopOpacity=".18" />
-          <stop offset="1" stopColor="#10B981" stopOpacity=".18" />
+        <linearGradient id="heroFloor" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#DBEAFE" stopOpacity=".22" />
+          <stop offset="1" stopColor="#C7D2FE" stopOpacity=".65" />
         </linearGradient>
       </defs>
-      <path d="M0 150 Q 60 120 120 150 T 240 150 T 320 150 V220 H0 Z" fill="url(#dashWaveGradient)" />
-      <path d="M0 150 Q 60 120 120 150 T 240 150 T 320 150" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" opacity=".45" />
-      <g transform="translate(70,40)">
-        <rect x="0" y="30" width="150" height="92" rx="14" fill="url(#dashCardGradient)" />
-        <rect x="14" y="50" width="34" height="24" rx="4" fill="#FCD34D" />
-        <rect x="14" y="88" width="60" height="8" rx="4" fill="#fff" opacity=".85" />
-        <rect x="14" y="102" width="90" height="7" rx="3.5" fill="#fff" opacity=".5" />
-        <circle cx="120" cy="60" r="16" fill="#fff" opacity=".15" />
+      <ellipse cx="240" cy="130" rx="118" ry="28" fill="url(#heroFloor)" />
+      <g transform="translate(112,18)">
+        <rect x="34" y="0" width="145" height="112" rx="10" fill="#fff" filter="drop-shadow(0 14px 24px rgba(37,99,235,.12))" />
+        <rect x="34" y="0" width="145" height="18" rx="10" fill="url(#heroCardTop)" />
+        <circle cx="49" cy="9" r="2.2" fill="#93C5FD" />
+        <circle cx="58" cy="9" r="2.2" fill="#93C5FD" />
+        <circle cx="67" cy="9" r="2.2" fill="#93C5FD" />
+        <circle cx="60" cy="44" r="15" fill="#3B82F6" opacity=".9" />
+        <path d="M51 57c5-8 14-8 19 0" fill="#DBEAFE" />
+        <circle cx="60" cy="39" r="6" fill="#DBEAFE" />
+        <rect x="85" y="35" width="46" height="5" rx="2.5" fill="#CBD5E1" />
+        <rect x="85" y="50" width="72" height="5" rx="2.5" fill="#E2E8F0" />
+        <rect x="49" y="77" width="35" height="4" rx="2" fill="#E2E8F0" />
+        <rect x="49" y="91" width="54" height="4" rx="2" fill="#E2E8F0" />
+        <rect x="114" y="82" width="6" height="28" rx="3" fill="#DBEAFE" />
+        <rect x="128" y="93" width="6" height="17" rx="3" fill="#C7D2FE" />
+        <rect x="142" y="88" width="6" height="22" rx="3" fill="#DBEAFE" />
+        <rect x="156" y="78" width="6" height="32" rx="3" fill="#C7D2FE" />
       </g>
-      <circle className="coin coinOne" cx="245" cy="55" r="16" fill="#F59E0B" />
-      <text x="245" y="61" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="700">₹</text>
-      <circle className="coin coinTwo" cx="270" cy="90" r="11" fill="#10B981" />
-      <text x="270" y="94.5" textAnchor="middle" fontSize="10" fill="#fff" fontWeight="700">₹</text>
-      <circle className="coin coinThree" cx="40" cy="70" r="9" fill="#2563EB" />
+      <g transform="translate(62,48)">
+        <path d="M32 55c-12-20-7-42 11-56 12 25 7 44-11 56Z" fill="#93C5FD" opacity=".8" />
+        <path d="M47 58c-1-23 12-40 34-48 0 27-12 42-34 48Z" fill="#60A5FA" opacity=".72" />
+        <path d="M52 71c5-21 21-32 43-33-8 24-23 35-43 33Z" fill="#BFDBFE" />
+        <rect x="34" y="70" width="38" height="26" rx="4" fill="#93C5FD" />
+        <path d="M31 70h44l-4 10H35Z" fill="#2563EB" opacity=".65" />
+      </g>
+      <g transform="translate(276,46)">
+        <circle cx="38" cy="25" r="23" fill="#EEF2FF" stroke="#A5B4FC" strokeWidth="3" />
+        <path d="M38 13v14l10 7" fill="none" stroke="#93A4F8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="7" y="55" width="60" height="48" rx="7" fill="#fff" filter="drop-shadow(0 12px 18px rgba(37,99,235,.12))" />
+        <rect x="7" y="55" width="60" height="13" rx="7" fill="#3B82F6" />
+        <rect x="17" y="49" width="5" height="13" rx="2.5" fill="#1D4ED8" />
+        <rect x="52" y="49" width="5" height="13" rx="2.5" fill="#1D4ED8" />
+        <rect x="18" y="77" width="7" height="5" rx="1" fill="#CBD5E1" />
+        <rect x="33" y="77" width="7" height="5" rx="1" fill="#CBD5E1" />
+        <rect x="48" y="77" width="7" height="5" rx="1" fill="#CBD5E1" />
+        <rect x="18" y="90" width="7" height="5" rx="1" fill="#CBD5E1" />
+        <rect x="33" y="90" width="7" height="5" rx="1" fill="#CBD5E1" />
+        <rect x="48" y="90" width="7" height="5" rx="1" fill="#CBD5E1" />
+      </g>
     </svg>
   );
 }
@@ -193,9 +251,12 @@ function DashboardWidgets() {
 
 export default function DashboardPage() {
   const nav = useNavigate();
+  const [attendanceSummary, setAttendanceSummary] = useState(attendanceSummaryFallback);
   const userInfo = getUserInfo();
   const { day, shortDate, fullDate } = getDashboardDate();
   const ownerName = [userInfo.first_name, userInfo.last_name].filter(Boolean).join(' ') || 'User';
+  const dashboardDateLabel = `${day}, ${fullDate}`;
+  const heroStats = buildHeroStats(attendanceSummary);
   const kpis = [
     { tone: 'success', icon: <Groups />, value: '42', label: 'Workers present today', trend: '6%', points: '0,22 15,20 30,24 45,14 60,16 75,8 100,6' },
     { tone: 'warning', icon: <Groups />, value: '8', label: 'Workers absent today', trend: '2%', points: '0,10 15,14 30,9 45,18 60,15 75,22 100,24' },
@@ -210,23 +271,48 @@ export default function DashboardPage() {
     ['View reports', <Assessment />, 'slate', () => nav('/reports')],
   ];
 
+  useEffect(() => {
+    let isActive = true;
+
+    workerApi.getAttendanceSummary()
+      .then((response) => {
+        if (!isActive) return;
+        setAttendanceSummary({
+          ...attendanceSummaryFallback,
+          ...(response.data?.data || {}),
+        });
+      })
+      .catch((error) => {
+        console.error('Failed to fetch attendance summary', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   return (
     <Box className="page dashboardPage">
       <Card className="dashCard welcomeCard">
         <CardContent>
           <Box className="welcomeText">
-            <Typography className="eyebrow">{day} overview</Typography>
-            <Typography variant="h4">
-              <b>Welcome back,</b> <Box component="span" sx={{ fontWeight: 400 }}>{ownerName}</Box>
-            </Typography>
-            <Typography className="welcomeSub">Here's how your team is doing today, {fullDate}.</Typography>
-            <Typography className="welcomeSummary">You have <b>8 pending salary payments</b> and <b>42 workers present</b> today.</Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} gap={1.5}>
-              <Button variant="contained" endIcon={<ChevronRight />} onClick={() => nav('/daily-payments')}>Process payments</Button>
-              <Button variant="outlined" onClick={() => nav('/attendance')}>Mark attendance</Button>
-            </Stack>
+            <Typography variant="h4">{getGreeting()}, {ownerName}</Typography>
+            <Typography className="welcomeDate"><CalendarMonth />{dashboardDateLabel}</Typography>
+            <Box className="welcomeStats">
+              {heroStats.map((stat) => (
+                <Box className="welcomeStat" key={stat.label}>
+                  <span className={`welcomeStatIcon ${stat.tone}`}>
+                    {stat.icon || <i />}
+                  </span>
+                  <span>
+                    <b>{formatStatValue(stat.value)}</b>
+                    <Typography>{stat.label}</Typography>
+                  </span>
+                </Box>
+              ))}
+            </Box>
           </Box>
-          <Box className="welcomeArt"><PayCardArt /></Box>
+          <Box className="welcomeArt"><DashboardHeroArt /></Box>
         </CardContent>
       </Card>
       <Box className="kpiGrid">{kpis.map((kpi) => <DashboardKpi key={kpi.label} {...kpi} />)}</Box>
@@ -291,3 +377,4 @@ export default function DashboardPage() {
     </Box>
   );
 }
+

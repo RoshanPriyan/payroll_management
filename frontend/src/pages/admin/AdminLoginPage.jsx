@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { adminAuthApi } from '../../api/adminAuthApi.js';
-import { adminAuthService } from '../../services/adminAuthService.js';
+import { useAuth } from '../../context/auth/useAuth.js';
+import { ROLES } from '../../services/auth/authSession.js';
 import LandingPage from '../landing/LandingPage.jsx';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,13 +20,14 @@ function getLoginErrorMessage(error) {
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
+  const auth = useAuth();
   const [form, setForm] = useState(initialForm);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  if (adminAuthService.isSuperAdminAuthenticated()) {
+  if (auth.authenticated && auth.role === ROLES.SUPER_ADMIN) {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
@@ -73,12 +75,18 @@ export default function AdminLoginPage() {
       });
       const adminData = response.data?.data || {};
 
-      if (adminData.role !== 'SUPER_ADMIN' || !adminData.access_token) {
+      if (String(adminData.role || '').toUpperCase() !== ROLES.SUPER_ADMIN || !adminData.access_token) {
         setError('This account does not have Super Admin access.');
         return;
       }
 
-      adminAuthService.storeSession(adminData);
+      const session = auth.login(adminData, { role: ROLES.SUPER_ADMIN });
+
+      if (!session.isAuthenticated) {
+        setError('Login response did not include a valid session token.');
+        return;
+      }
+
       setSuccess(response.data?.message || 'User login successfully');
       navigate('/admin/dashboard', { replace: true });
     } catch (loginError) {

@@ -1,11 +1,17 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/auth/useAuth.js';
+import { ROLES } from '../services/auth/authSession.js';
 
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ allowedRoles = [ROLES.ADMIN], loginPath = '/login' }) {
   const location = useLocation();
-  const token = localStorage.getItem('access_token');
+  const auth = useAuth();
 
-  if (!token) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!auth.isAuthenticated()) {
+    return <Navigate to={loginPath} replace state={{ from: location }} />;
+  }
+
+  if (allowedRoles.length > 0 && !allowedRoles.includes(auth.role)) {
+    return <Navigate to="/unauthorized" replace state={{ from: location }} />;
   }
 
   return <Outlet />;

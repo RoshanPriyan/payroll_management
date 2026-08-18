@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient.js';
+import { clearAuthSession } from './auth/authSession.js';
 
 export const authService = {
   login: (payload) => axiosClient.post('/v1/users/login', payload),
@@ -7,7 +8,9 @@ export const authService = {
   getUserDetail: (userId) => axiosClient.get('/v1/users/user-detail', { params: { user_id: userId } }),
   updateUserProfile: (payload) => axiosClient.put('/v1/users/update-user-profile', payload),
   logout: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_info');
+    clearAuthSession();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('auth:logout'));
+    }
   },
 };

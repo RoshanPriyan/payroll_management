@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { AuthProvider } from './context/auth/AuthContext.jsx';
 import AppRoutes from './routes/AppRoutes.jsx';
 import { theme } from './styles/theme.js';
 import './App.css';
@@ -11,7 +12,9 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

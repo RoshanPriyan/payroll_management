@@ -48,7 +48,23 @@
 .adminUsersStatusControl .MuiSwitch-switchBase.Mui-checked{transform:translateX(16px);color:#fff}
 .adminUsersStatusControl .MuiSwitch-switchBase.Mui-checked+.MuiSwitch-track{background:#2563eb;opacity:1}
 .adminUsersState{display:flex;align-items:center;gap:8px;padding:18px 0;color:#64748b;font-size:13px;font-weight:700}
+.workerDetailsDialog .MuiPaper-root{border-radius:16px;overflow:hidden}
+.workerDetailsTitle{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;font-weight:800!important;padding:18px 22px!important}
+.workerDetailsContent{padding:20px 22px 8px!important;overflow-x:hidden}
+.workerDetailsHero{display:flex;align-items:center;gap:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:16px}
+.workerDetailsHero h6{font-size:18px;font-weight:800;color:#0f172a;line-height:1.2}
+.workerDetailsHero p{font-size:12px;font-weight:800;color:#2563eb;margin-top:2px}
+.workerDetailsAvatar{width:48px;height:48px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
+.workerDetailsStatus{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:900;text-transform:uppercase;white-space:nowrap}
+.workerDetailsStatus::before{content:"";width:7px;height:7px;border-radius:50%;background:#2563eb}
+.workerDetailsStatusInactive{background:#fef3c7;color:#b45309}
+.workerDetailsStatusInactive::before{background:#f59e0b}
+.workerDetailsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.workerDetailsItem{min-width:0;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px;padding:12px 14px}
+.workerDetailsItem span{display:block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#60a5fa;margin-bottom:5px}
+.workerDetailsItem b{display:block;font-size:13.5px;color:#0f172a;font-weight:800;overflow-wrap:anywhere}
+.workerDetailsActions{padding:14px 22px 18px!important;background:#f8fbff;border-top:1px solid #dbeafe}
 .adminUsersRegisterModalLayer{position:fixed;inset:0;z-index:2100;min-height:0;background:transparent;overflow:visible;pointer-events:none}
 .landing-page .adminUsersRegisterBackdrop{pointer-events:auto;background:rgba(2,6,23,.56);backdrop-filter:blur(3px)}
 .landing-page .adminUsersAuthWide{grid-column:1/-1}
-@media(max-width:900px){.adminUsersSidebar{position:static;width:100%;height:auto}.adminUsersShell{display:block}.adminUsersMain{margin-left:0}.adminUsersTopbar{padding:0 18px}.adminUsersProfileMeta{display:none}.adminUsersContent{padding:20px 18px 44px}}
+@media(max-width:900px){.adminUsersSidebar{position:static;width:100%;height:auto}.adminUsersShell{display:block}.adminUsersMain{margin-left:0}.adminUsersTopbar{padding:0 18px}.adminUsersProfileMeta{display:none}.adminUsersContent{padding:20px 18px 44px}.workerDetailsGrid{grid-template-columns:1fr}.workerDetailsHero{align-items:flex-start}.workerDetailsStatus{margin-left:0}}

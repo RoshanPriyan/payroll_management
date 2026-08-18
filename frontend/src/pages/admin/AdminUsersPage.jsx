@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Add,
   Assessment,
@@ -129,7 +129,7 @@ export default function AdminUsersPage() {
   const adminName = useMemo(() => getStoredAdminName(), []);
   const initials = useMemo(() => getInitials(adminName), [adminName]);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -144,11 +144,12 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    const timer = window.setTimeout(loadUsers, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadUsers]);
 
   useEffect(() => {
     if (!error) return undefined;

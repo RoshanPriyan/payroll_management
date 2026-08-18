@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import AdminProtectedRoute from './AdminProtectedRoute.jsx';
+import AdminRoute from './AdminRoute.jsx';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx';
 import AdminLoginPage from '../pages/admin/AdminLoginPage.jsx';
 import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx';
@@ -8,6 +8,7 @@ import AttendancePage from '../pages/attendance/AttendancePage.jsx';
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import LandingPage from '../pages/landing/LandingPage.jsx';
 import Login from '../pages/Login.jsx';
+import Unauthorized from '../pages/Unauthorized.jsx';
 import DailyPaymentsPage from '../pages/payments/DailyPaymentsPage.jsx';
 import PaymentHistoryPage from '../pages/payments/PaymentHistoryPage.jsx';
 import WeeklyPaymentsPage from '../pages/payments/WeeklyPaymentsPage.jsx';
@@ -24,7 +25,8 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route element={<AdminProtectedRoute />}>
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route element={<AdminRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
       </Route>
@@ -39,6 +41,7 @@ export default function AppRoutes() {
           <Route path="/daily-payments" element={<DailyPaymentsPage />} />
           <Route path="/weekly-payments" element={<WeeklyPaymentsPage />} />
           <Route path="/payroll" element={<WeeklyPaymentsPage />} />
+          <Route path="/salary" element={<WeeklyPaymentsPage />} />
           <Route path="/history" element={<PaymentHistoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />

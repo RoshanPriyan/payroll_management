@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/auth/useAuth.js';
 import { authService } from '../../services/authService.js';
 import LoginForm from './LoginForm.jsx';
 import RegisterForm from './RegisterForm.jsx';
@@ -45,6 +46,7 @@ function getLoginErrorMessage(error) {
 
 export default function AuthModal({ mode, onClose, onSwitch }) {
   const navigate = useNavigate();
+  const auth = useAuth();
   const isLogin = mode === 'login';
   const [form, setForm] = useState({});
   const [error, setError] = useState('');
@@ -95,26 +97,12 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
       try {
         const response = await authService.login(payload);
         const userData = response.data?.data;
+        const session = auth.login(userData, { email: payload.email });
 
-        localStorage.setItem('access_token', userData.access_token);
-        localStorage.setItem(
-          'user_info',
-          JSON.stringify({
-            user_id: userData.user_id,
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            tenant_name: userData.tenant_name,
-            email: userData.email || payload.email,
-            phone: userData.phone,
-            country: userData.country || userData.country_name,
-            address: userData.address || userData.address_details,
-            address_line1: userData.address_line1,
-            address_line2: userData.address_line2,
-            city: userData.city,
-            state: userData.state,
-            pincode: userData.pincode || userData.zip_code,
-          }),
-        );
+        if (!session.isAuthenticated) {
+          setError('Login response did not include a valid session token.');
+          return;
+        }
 
         setSuccess(response.data?.message || 'User login successfully');
         redirectTimer.current = window.setTimeout(() => {
