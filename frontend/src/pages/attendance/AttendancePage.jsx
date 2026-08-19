@@ -8,7 +8,6 @@ const ATTENDANCE_STATUSES = [
   { label: 'Present', value: 'PRESENT', color: 'primary' },
   { label: 'Absent', value: 'ABSENT', color: 'error' },
   { label: 'Half Day', value: 'HALF_DAY', color: 'warning' },
-  { label: 'Leave', value: 'LEAVE', color: 'primary' },
 ];
 
 const DEFAULT_STATUS = 'PRESENT';

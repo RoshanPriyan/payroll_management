@@ -12,8 +12,63 @@ const attendanceSummaryFallback = {
   present_count: null,
   absent_count: null,
   half_day_count: null,
-  leave_count: null,
 };
+
+const attendanceOverviewLegend = [
+  ['Present', 'greenDot'],
+  ['Absent', 'redDot'],
+  ['Half Day', 'orangeDot'],
+];
+
+function toCount(value) {
+  const count = Number(value);
+  return Number.isFinite(count) ? count : 0;
+}
+
+function getLocalDateValue(date) {
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 10);
+}
+
+function formatWeeklyDateLabel(dateValue) {
+  const [year, month, day] = String(dateValue).split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('en-IN', { weekday: 'short' });
+}
+
+function buildWeeklyFallback() {
+  const today = new Date();
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - index));
+
+    return {
+      date: getLocalDateValue(date),
+      day: formatWeeklyDateLabel(getLocalDateValue(date)),
+      present: 0,
+      absent: 0,
+      halfDay: 0,
+    };
+  });
+}
+
+function normalizeWeeklyAttendance(items) {
+  if (!Array.isArray(items) || items.length === 0) return buildWeeklyFallback();
+
+  return items.map((item) => ({
+    date: item.date,
+    day: formatWeeklyDateLabel(item.date),
+    present: toCount(item.present),
+    absent: toCount(item.absent),
+    halfDay: toCount(item.half_day),
+  }));
+}
+
+function getAttendanceBarHeight(value, maxValue) {
+  if (!value || !maxValue) return 0;
+  return Math.max(14, Math.round((value / maxValue) * 180));
+}
 
 function buildHeroStats(summary) {
   return [
@@ -21,7 +76,6 @@ function buildHeroStats(summary) {
     { label: 'Present Today', value: summary.present_count, tone: 'green' },
     { label: 'Absent Today', value: summary.absent_count, tone: 'red' },
     { label: 'Half Day', value: summary.half_day_count, tone: 'amber' },
-    { label: 'On Leave', value: summary.leave_count, tone: 'purple' },
   ];
 }
 
@@ -252,6 +306,7 @@ function DashboardWidgets() {
 export default function DashboardPage() {
   const nav = useNavigate();
   const [attendanceSummary, setAttendanceSummary] = useState(attendanceSummaryFallback);
+  const [weeklyAttendance, setWeeklyAttendance] = useState(() => buildWeeklyFallback());
   const userInfo = getUserInfo();
   const { day, shortDate, fullDate } = getDashboardDate();
   const ownerName = [userInfo.first_name, userInfo.last_name].filter(Boolean).join(' ') || 'User';
@@ -270,6 +325,10 @@ export default function DashboardPage() {
     ['Generate payroll', <Wallet />, 'purple', () => nav('/weekly-payments')],
     ['View reports', <Assessment />, 'slate', () => nav('/reports')],
   ];
+  const maxAttendanceCount = Math.max(
+    0,
+    ...weeklyAttendance.flatMap((item) => [item.present, item.absent, item.halfDay]),
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -284,6 +343,15 @@ export default function DashboardPage() {
       })
       .catch((error) => {
         console.error('Failed to fetch attendance summary', error);
+      });
+
+    workerApi.getWeeklyAttendanceSummary()
+      .then((response) => {
+        if (!isActive) return;
+        setWeeklyAttendance(normalizeWeeklyAttendance(response.data?.data));
+      })
+      .catch((error) => {
+        console.error('Failed to fetch weekly attendance summary', error);
       });
 
     return () => {
@@ -330,15 +398,26 @@ export default function DashboardPage() {
       <Box className="analyticsGrid">
         <Card className="dashCard chartCard">
           <CardContent>
-            <SectionHead title="Attendance overview" sub="Present vs. absent - last 7 days" action={<Stack direction="row" gap={2} className="legend"><span><i className="dot greenDot" />Present</span><span><i className="dot orangeDot" />Absent</span></Stack>} />
+            <SectionHead
+              title="Attendance overview"
+              sub="Status breakdown - last 7 days"
+              action={(
+                <Stack direction="row" gap={2} className="legend">
+                  {attendanceOverviewLegend.map(([label, dotClass]) => (
+                    <span key={label}><i className={`dot ${dotClass}`} />{label}</span>
+                  ))}
+                </Stack>
+              )}
+            />
             <Box className="attendanceBars">
-              {[38, 41, 39, 44, 40, 36, 42].map((present, index) => (
-                <Box className="dayGroup" key={index}>
+              {weeklyAttendance.map((day) => (
+                <Box className="dayGroup" key={day.date}>
                   <Box className="barPair">
-                    <span className="presentBar" style={{ height: present * 4 }} />
-                    <span className="absentBar" style={{ height: [6, 4, 7, 3, 5, 9, 8][index] * 10 }} />
+                    <span className="presentBar" style={{ height: getAttendanceBarHeight(day.present, maxAttendanceCount) }} />
+                    <span className="absentBar" style={{ height: getAttendanceBarHeight(day.absent, maxAttendanceCount) }} />
+                    <span className="halfDayBar" style={{ height: getAttendanceBarHeight(day.halfDay, maxAttendanceCount) }} />
                   </Box>
-                  <Typography>{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}</Typography>
+                  <Typography>{day.day}</Typography>
                 </Box>
               ))}
             </Box>

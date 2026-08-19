@@ -34,6 +34,6 @@ class AttendanceModel(Base):
     business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
     worker_id = Column(Integer, ForeignKey("workers.id"), nullable=False)
     attendance_date = Column(Date, nullable=False)
-    attendance_status = Column(Enum("PRESENT", "ABSENT", "HALF_DAY", "LEAVE", name="attendance_status_enum"), nullable=False)
+    attendance_status = Column(Enum("PRESENT", "ABSENT", "HALF_DAY", name="attendance_status_enum"), nullable=False)
     remarks = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
