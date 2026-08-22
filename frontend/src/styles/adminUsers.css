@@ -64,6 +64,12 @@
 .workerDetailsItem span{display:block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#60a5fa;margin-bottom:5px}
 .workerDetailsItem b{display:block;font-size:13.5px;color:#0f172a;font-weight:800;overflow-wrap:anywhere}
 .workerDetailsActions{padding:14px 22px 18px!important;background:#f8fbff;border-top:1px solid #dbeafe}
+.dailyPaymentsTable{min-width:850px}
+.adminUsersTable th.dailyPaymentAmount,.adminUsersTable td.dailyPaymentAmount{text-align:right}
+.adminUsersTable th.dailyPaymentActions,.adminUsersTable td.dailyPaymentActions{text-align:right}
+.dailyPaymentStatusPending{background:#fffbeb;color:#b45309}
+.dailyPaymentStatusPending::before{background:#f59e0b}
+.dailyPaymentAction.MuiButton-root{min-width:auto;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:none;box-shadow:none}
 .adminUsersRegisterModalLayer{position:fixed;inset:0;z-index:2100;min-height:0;background:transparent;overflow:visible;pointer-events:none}
 .landing-page .adminUsersRegisterBackdrop{pointer-events:auto;background:rgba(2,6,23,.56);backdrop-filter:blur(3px)}
 .landing-page .adminUsersAuthWide{grid-column:1/-1}

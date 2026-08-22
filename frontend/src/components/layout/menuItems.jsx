@@ -1,4 +1,4 @@
-import { Assessment, CalendarMonth, Dashboard, Groups, Paid, Payments, Settings, Wallet } from '@mui/icons-material';
+import { Assessment, CalendarMonth, Dashboard, Groups, Paid, Payments, Settings } from '@mui/icons-material';
 import { ROLES } from '../../services/auth/authSession.js';
 
 export const menuSections = [
@@ -18,8 +18,7 @@ export const menuSections = [
   {
     label: 'Payroll',
     items: [
-      { to: '/daily-payments', label: 'Daily Payments', icon: <Payments />, roles: [ROLES.ADMIN] },
-      { to: '/weekly-payments', label: 'Weekly Payments', icon: <Wallet />, roles: [ROLES.ADMIN] },
+      { to: '/payment-details', label: 'Payment Details', icon: <Payments />, roles: [ROLES.ADMIN] },
       { to: '/history', label: 'Payment History', icon: <Paid />, roles: [ROLES.ADMIN] },
       { to: '/reports', label: 'Reports', icon: <Assessment />, roles: [ROLES.ADMIN] },
     ],
