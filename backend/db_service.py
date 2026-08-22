@@ -16,3 +16,7 @@ class DBService:
     @staticmethod
     def execute(session, stmt):
         return session.execute(stmt)
+    
+    @staticmethod
+    def mappings_all(session, stmt):
+        return session.execute(stmt).mappings().all()

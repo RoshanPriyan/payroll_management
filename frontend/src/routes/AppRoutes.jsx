@@ -9,9 +9,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import LandingPage from '../pages/landing/LandingPage.jsx';
 import Login from '../pages/Login.jsx';
 import Unauthorized from '../pages/Unauthorized.jsx';
-import DailyPaymentsPage from '../pages/payments/DailyPaymentsPage.jsx';
+import PaymentDetailsPage from '../pages/payments/PaymentDetailsPage.jsx';
 import PaymentHistoryPage from '../pages/payments/PaymentHistoryPage.jsx';
-import WeeklyPaymentsPage from '../pages/payments/WeeklyPaymentsPage.jsx';
 import ReportsPage from '../pages/reports/ReportsPage.jsx';
 import SettingsPage from '../pages/settings/SettingsPage.jsx';
 import AddWorkerPage from '../pages/workers/AddWorkerPage.jsx';
@@ -38,10 +37,11 @@ export default function AppRoutes() {
           <Route path="/workers/add" element={<AddWorkerPage />} />
           <Route path="/workers/edit/:id" element={<EditWorkerPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
-          <Route path="/daily-payments" element={<DailyPaymentsPage />} />
-          <Route path="/weekly-payments" element={<WeeklyPaymentsPage />} />
-          <Route path="/payroll" element={<WeeklyPaymentsPage />} />
-          <Route path="/salary" element={<WeeklyPaymentsPage />} />
+          <Route path="/payment-details" element={<PaymentDetailsPage />} />
+          <Route path="/daily-payments" element={<Navigate to="/payment-details" replace />} />
+          <Route path="/weekly-payments" element={<Navigate to="/payment-details" replace />} />
+          <Route path="/payroll" element={<Navigate to="/payment-details" replace />} />
+          <Route path="/salary" element={<Navigate to="/payment-details" replace />} />
           <Route path="/history" element={<PaymentHistoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
