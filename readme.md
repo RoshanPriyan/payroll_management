@@ -459,8 +459,8 @@ main
 Example workflow:
 
 ```bash
-git checkout main
-git pull origin main
+git checkout develop
+git pull origin develop
 
 git checkout -b feature/payment-api
 ```
