@@ -6,6 +6,16 @@ export const workerApi = {
   getWeeklyAttendanceSummary: () => axiosClient.get('/v1/dashboard/weekly-summary'),
   getWorkerById: (id) => axiosClient.get('/v1/worker/byid', { params: { worker_id: id } }),
   createWorker: (payload) => axiosClient.post('/v1/worker/register', payload),
+  importWorkers: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return axiosClient.post('/v1/worker/import-worker', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   updateWorker: (payload) => axiosClient.put('/v1/worker/update-worker', payload),
   deleteWorker: (id) => axiosClient.delete('/v1/worker/delete-worker', { params: { worker_id: id } }),
 };

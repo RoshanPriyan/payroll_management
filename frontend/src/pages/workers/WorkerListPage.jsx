@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, DeleteOutline, Edit, Search, Visibility } from '@mui/icons-material';
+import { Add, DeleteOutline, Download, Edit, FileUpload, Search, Visibility } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { workerApi } from '../../api/workerApi.js';
 import { money } from '../../components/common/formatters.js';
@@ -39,6 +39,12 @@ const genderLabels = {
   MALE: 'Male',
   FEMALE: 'Female',
 };
+
+const workerImportSampleCsv = `first_name,last_name,phone,email,gender,joining_date,salary_type,salary_amount,payment_mode,bank_name,account_number,ifsc_code,upi_id
+Ravi,Kumar,9876543210,ravi@gmail.com,Male,01/08/2026,DAILY,800,CASH,,,,
+Suresh,,9876543211,suresh@gmail.com,Male,01/08/2026,MONTHLY,25000,BANK,HDFC,1234567890,HDFC0001234,
+Priya,,9876543212,priya@gmail.com,Female,01/08/2026,WEEKLY,5000,UPI,,,,priya@upi
+`;
 
 function getGenderLabel(value) {
   if (!value) return '-';
@@ -105,6 +111,24 @@ function getWorkerInitials(name) {
     .toUpperCase();
 }
 
+function getImportSummary(data) {
+  return data?.data || {};
+}
+
+function getImportWarningMessage(summary) {
+  const errors = Array.isArray(summary?.errors) ? summary.errors : [];
+  const failedCount = Number(summary?.failed_count || errors.length || 0);
+
+  if (errors.length > 0) {
+    return [
+      `${failedCount} record${failedCount === 1 ? '' : 's'} failed.`,
+      ...errors.map((error) => `Row ${error.row || '-'} - ${error.message || 'Unable to import this row.'}`),
+    ].join('\n');
+  }
+
+  return failedCount > 0 ? `${failedCount} records could not be imported.` : 'Import completed. Some records could not be imported.';
+}
+
 export default function WorkerListPage() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('All');
@@ -117,6 +141,12 @@ export default function WorkerListPage() {
   const [viewWorkerError, setViewWorkerError] = useState('');
   const [deletingWorker, setDeletingWorker] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importError, setImportError] = useState('');
+  const [importingWorkers, setImportingWorkers] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const [warningMessage, setWarningMessage] = useState('');
   const nav = useNavigate();
   const location = useLocation();
   const workerCreatedMessage = location.state?.workerCreatedMessage || '';
@@ -169,6 +199,27 @@ export default function WorkerListPage() {
     return () => window.clearTimeout(timer);
   }, [loadWorkers, location.pathname, nav, shouldRefreshWorkers, workerCreatedMessage]);
 
+  useEffect(() => {
+    if (!importError) return undefined;
+
+    const timer = window.setTimeout(() => setImportError(''), 5000);
+    return () => window.clearTimeout(timer);
+  }, [importError]);
+
+  useEffect(() => {
+    if (!deleteError) return undefined;
+
+    const timer = window.setTimeout(() => setDeleteError(''), 5000);
+    return () => window.clearTimeout(timer);
+  }, [deleteError]);
+
+  useEffect(() => {
+    if (!importResult) return undefined;
+
+    const timer = window.setTimeout(() => setImportResult(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [importResult]);
+
   const handleViewWorker = async (worker) => {
     setViewWorker(worker);
     setLoadingViewWorker(true);
@@ -207,16 +258,103 @@ export default function WorkerListPage() {
     }
   };
 
+  const handleDownloadSampleCsv = () => {
+    const blob = new Blob([workerImportSampleCsv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'worker-import-sample.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleOpenImportDialog = () => {
+    setImportFile(null);
+    setImportError('');
+    setImportDialogOpen(true);
+  };
+
+  const handleCloseImportDialog = () => {
+    if (importingWorkers) return;
+
+    setImportDialogOpen(false);
+    setImportFile(null);
+    setImportError('');
+  };
+
+  const handleImportFileChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    event.target.value = '';
+
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      setImportFile(null);
+      setImportError('Only .csv files can be uploaded.');
+      return;
+    }
+
+    setImportFile(file);
+    setImportError('');
+  };
+
+  const handleUploadWorkers = async () => {
+    if (!importFile) {
+      setImportError('Select a CSV file before uploading.');
+      return;
+    }
+
+    setImportingWorkers(true);
+    setImportError('');
+
+    try {
+      const response = await workerApi.importWorkers(importFile);
+      const summary = getImportSummary(response.data);
+      const failedCount = Number(summary.failed_count || 0);
+
+      setImportResult(summary);
+      setImportDialogOpen(false);
+      setImportFile(null);
+      await loadWorkers();
+
+      if (failedCount > 0) {
+        setWarningMessage(getImportWarningMessage(summary));
+      } else {
+        setSuccessMessage(response.data?.message || 'Worker import successfully');
+      }
+    } catch (apiError) {
+      setImportError(apiError.response?.data?.message || 'Unable to import workers. Please try again.');
+    } finally {
+      setImportingWorkers(false);
+    }
+  };
+
+  const hasImportFailures = Number(importResult?.failed_count || 0) > 0;
+  const importErrors = Array.isArray(importResult?.errors) ? importResult.errors : [];
+
   return (
     <Box className="page">
       <Snackbar
         open={!!successMessage}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={() => setSuccessMessage('')}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert severity="success" onClose={() => setSuccessMessage('')}>
           {successMessage}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={!!warningMessage}
+        autoHideDuration={5000}
+        onClose={() => setWarningMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity="warning" onClose={() => setWarningMessage('')} sx={{ whiteSpace: 'pre-line' }}>
+          {warningMessage}
         </Alert>
       </Snackbar>
       <Stack className="toolrow" direction={{ xs: 'column', sm: 'row' }} gap={2}>
@@ -230,8 +368,45 @@ export default function WorkerListPage() {
           <Box>
             <h2>Worker List</h2>
           </Box>
-          <Button onClick={() => nav('/workers/add')} variant="contained" startIcon={<Add />}>Add Worker</Button>
+          <Stack direction={{ xs: 'column', sm: 'row' }} gap={1} className="workerImportActions">
+            <Button onClick={handleDownloadSampleCsv} variant="outlined" startIcon={<Download />}>Download Sample CSV</Button>
+            <Button onClick={handleOpenImportDialog} variant="outlined" startIcon={<FileUpload />}>Import Workers</Button>
+            <Button onClick={() => nav('/workers/add')} variant="contained" startIcon={<Add />}>Add Worker</Button>
+          </Stack>
         </Box>
+
+        {importResult && (
+          <Box className="workerImportSummary">
+            <Alert severity={hasImportFailures ? 'warning' : 'success'} onClose={() => setImportResult(null)}>
+              <Typography fontWeight={800} mb={1}>Import Completed</Typography>
+              <Box className="workerImportSummaryGrid">
+                <span>Total Records: <b>{importResult.total_records ?? 0}</b></span>
+                <span>Imported Successfully: <b>{importResult.success_count ?? 0}</b></span>
+                <span>Failed Records: <b>{importResult.failed_count ?? 0}</b></span>
+              </Box>
+            </Alert>
+            {importErrors.length > 0 && (
+              <Box className="adminUsersTableWrap workerImportErrorsWrap">
+                <table className="adminUsersTable workerImportErrorsTable">
+                  <thead>
+                    <tr>
+                      <th>Row</th>
+                      <th>Error Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importErrors.map((error, index) => (
+                      <tr key={`${error.row || 'row'}-${index}`}>
+                        <td><span className="adminUsersCode">Row {error.row || '-'}</span></td>
+                        <td>{error.message || 'Unable to import this row.'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Box>
+            )}
+          </Box>
+        )}
 
         <Box className="adminUsersTableWrap">
           <table className="adminUsersTable workerAdminTable">
@@ -352,6 +527,29 @@ export default function WorkerListPage() {
           {viewWorker && !loadingViewWorker && !viewWorkerError && (
             <Button variant="contained" onClick={() => nav('/workers/edit/' + viewWorker.id, { state: { worker: viewWorker } })}>Edit</Button>
           )}
+        </DialogActions>
+      </Dialog>
+      <Dialog open={importDialogOpen} onClose={handleCloseImportDialog} fullWidth maxWidth="sm">
+        <DialogTitle>Import Workers</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2.25} sx={{ pt: 1 }}>
+            <Alert severity="info">Upload a CSV file using the sample format.</Alert>
+            <Button component="label" variant="outlined" startIcon={<FileUpload />} disabled={importingWorkers}>
+              Select CSV File
+              <input type="file" accept=".csv,text/csv" hidden onChange={handleImportFileChange} />
+            </Button>
+            <Box className="workerImportFileName">
+              <span>Selected file</span>
+              <b>{importFile?.name || 'No file selected'}</b>
+            </Box>
+            {importError && <Alert severity="error">{importError}</Alert>}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImportDialog} disabled={importingWorkers}>Cancel</Button>
+          <Button variant="contained" onClick={handleUploadWorkers} disabled={importingWorkers || !importFile}>
+            {importingWorkers ? 'Uploading...' : 'Upload'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

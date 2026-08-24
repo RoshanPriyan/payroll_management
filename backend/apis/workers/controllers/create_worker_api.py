@@ -75,8 +75,7 @@ async def create_worker_api(
             bank_name=bank_name,
             account_number=account_number,
             ifsc_code=ifsc_code,
-            upi_id=upi_id,
-            status="ACTIVE"
+            upi_id=upi_id
         )
 
         session.add(worker_data)

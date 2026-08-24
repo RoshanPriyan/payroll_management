@@ -5,7 +5,7 @@ from global_utils import CustomException
 from config import JWT_SECRET, JWT_ALGORITHM, ADMIN_ROLE
 
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 
 def generate_access_token(user_id: int, tenant_id: int = None, role: str = ADMIN_ROLE):
