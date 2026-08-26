@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional, List
 from enum import Enum
@@ -57,3 +57,14 @@ class WorkerAttendanceSchema(BaseModel):
 class CreateAttendanceSchema(BaseModel):
     attendance_date: date
     workers: List[WorkerAttendanceSchema]
+
+
+class PageNation(BaseModel):
+    page: int = Field(default=1, ge=1)
+    limit: int = Field(default=10, ge=1, le=100)
+
+
+class AttendanceHistorySchema(PageNation):
+    status: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None

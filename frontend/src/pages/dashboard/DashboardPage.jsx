@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Avatar,
   Box,
   Button,
   Card,
@@ -847,13 +846,41 @@ function DashboardPayments() {
   );
 }
 
+const WidgetPaymentProgress = ({
+  progress,
+  paid,
+  left,
+}) => (
+  <>
+    <Box className="progress">
+      <span
+        style={{
+          width: progress,
+        }}
+      />
+    </Box>
+
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+    >
+      <Typography className="muted">
+        {paid} paid
+      </Typography>
+
+      <Typography className="muted">
+        {left} left
+      </Typography>
+    </Stack>
+  </>
+);
+
 function DashboardWidgets() {
   return (
     <Box className="dashBlock">
       <SectionHead title="Smart widgets" />
 
       <Box className="widgetGrid">
-
         <Card className="dashCard widgetCard">
           <CardContent>
             <Typography className="widgetLabel">
@@ -864,26 +891,11 @@ function DashboardWidgets() {
               ₹42,900
             </Typography>
 
-            <Box className="progress">
-              <span
-                style={{
-                  width: '64%',
-                }}
-              />
-            </Box>
-
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
-              <Typography className="muted">
-                ₹27,450 paid
-              </Typography>
-
-              <Typography className="muted">
-                ₹15,450 left
-              </Typography>
-            </Stack>
+            <WidgetPaymentProgress
+              progress="64%"
+              paid="₹27,450"
+              left="₹15,450"
+            />
           </CardContent>
         </Card>
 
@@ -901,6 +913,12 @@ function DashboardWidgets() {
               <CalendarMonth fontSize="small" />
               Due Fri, 31 Jul · 9 workers
             </Typography>
+
+            <WidgetPaymentProgress
+              progress="38%"
+              paid="₹24,400"
+              left="₹39,800"
+            />
           </CardContent>
         </Card>
 
@@ -918,88 +936,15 @@ function DashboardWidgets() {
               <CalendarMonth fontSize="small" />
               Due 1 Aug · 14 workers
             </Typography>
-          </CardContent>
-        </Card>
 
-        <Card className="dashCard widgetCard">
-          <CardContent>
-            <Typography className="widgetLabel">
-              Needs payment today
-            </Typography>
-
-            {[
-              'Amit Sharma',
-              'Rohan Verma',
-              'Sneha Patel',
-            ].map(
-              (name, index) => (
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  gap={1}
-                  className="payChip"
-                  key={name}
-                >
-                  <Avatar
-                    sx={{
-                      width: 26,
-                      height: 26,
-                      fontSize: 11,
-                      bgcolor: [
-                        '#DBEAFE',
-                        '#FEF3C7',
-                        '#EDE9FE',
-                      ][index],
-                      color: [
-                        '#2563EB',
-                        '#B45309',
-                        '#7C3AED',
-                      ][index],
-                    }}
-                  >
-                    {name
-                      .split(' ')
-                      .map(
-                        (part) =>
-                          part[0],
-                      )
-                      .join('')}
-                  </Avatar>
-
-                  <Typography>
-                    {name}
-                  </Typography>
-
-                  <Button size="small">
-                    Pay
-                  </Button>
-                </Stack>
-              ),
-            )}
+            <WidgetPaymentProgress
+              progress="52%"
+              paid="₹1,61,200"
+              left="₹1,48,800"
+            />
           </CardContent>
         </Card>
       </Box>
-
-      <Card className="dashCard emptyDashboard">
-        <CardContent>
-          <Assessment />
-
-          <Typography variant="h6">
-            No overtime requests pending
-          </Typography>
-
-          <Typography className="muted">
-            You're all caught up. New
-            requests from your team will
-            show up here as soon as they
-            come in.
-          </Typography>
-
-          <Button variant="outlined">
-            Set up overtime rules
-          </Button>
-        </CardContent>
-      </Card>
     </Box>
   );
 }

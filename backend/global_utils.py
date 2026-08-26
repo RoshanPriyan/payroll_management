@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import random
 
 
-def success_response(status_code: int, details: str, data=None) -> dict:
+def success_response(status_code: int, details: str, data=None, pagination=None) -> dict:
     response = {
         "status_code": status_code,
         "success": True,
@@ -11,7 +11,15 @@ def success_response(status_code: int, details: str, data=None) -> dict:
     }
     if data:
         response['data'] = data
-        
+
+    if pagination:
+        response["pagination"] = {
+            "total_pages": pagination.get("total_pages", 0),
+            "previous_page": pagination.get("previous_page"),
+            "current_page": pagination.get("current_page", 1),
+            "next_page": pagination.get("next_page")
+        }
+
     return response
 
 
