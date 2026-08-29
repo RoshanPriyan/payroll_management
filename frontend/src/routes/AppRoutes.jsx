@@ -11,6 +11,7 @@ import Login from '../pages/Login.jsx';
 import Unauthorized from '../pages/Unauthorized.jsx';
 import PaymentDetailsPage from '../pages/payments/PaymentDetailsPage.jsx';
 import PaymentHistoryPage from '../pages/payments/PaymentHistoryPage.jsx';
+import PayrollConfigurationPage from '../pages/payroll/PayrollConfigurationPage.jsx';
 import ReportsPage from '../pages/reports/ReportsPage.jsx';
 import SettingsPage from '../pages/settings/SettingsPage.jsx';
 import AddWorkerPage from '../pages/workers/AddWorkerPage.jsx';
@@ -38,6 +39,8 @@ export default function AppRoutes() {
           <Route path="/workers/edit/:id" element={<EditWorkerPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/payment-details" element={<PaymentDetailsPage />} />
+          <Route path="/payroll-configuration" element={<PayrollConfigurationPage />} />
+          <Route path="/system-configuration" element={<PayrollConfigurationPage />} />
           <Route path="/daily-payments" element={<Navigate to="/payment-details" replace />} />
           <Route path="/weekly-payments" element={<Navigate to="/payment-details" replace />} />
           <Route path="/payroll" element={<Navigate to="/payment-details" replace />} />

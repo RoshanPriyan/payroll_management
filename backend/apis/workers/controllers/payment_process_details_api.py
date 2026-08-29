@@ -26,7 +26,6 @@ async def payment_process_details_api(
         # Validate payment type
         # ---------------------------------------------------------
         payment_type = payment_type.upper()
-
         allowed_payment_types = {"DAILY", "WEEKLY", "MONTHLY"}
 
         if payment_type not in allowed_payment_types:
@@ -44,33 +43,19 @@ async def payment_process_details_api(
         # Calculate date range
         # ---------------------------------------------------------
         if payment_type == "DAILY":
-
             start_date = today
             end_date = today
 
         elif payment_type == "WEEKLY":
-
             # Monday -> Sunday
-            start_date = today - timedelta(
-                days=today.weekday()
-            )
-
+            start_date = today - timedelta(days=today.weekday())
             end_date = start_date + timedelta(days=6)
-
         else:
-
             # First day of current month
             start_date = today.replace(day=1)
-
             # Last day of current month
-            last_day = calendar.monthrange(
-                today.year,
-                today.month
-            )[1]
-
-            end_date = today.replace(
-                day=last_day
-            )
+            last_day = calendar.monthrange(today.year, today.month)[1]
+            end_date = today.replace(day=last_day)
 
         # ---------------------------------------------------------
         # Get ONLY workers matching selected payment type
@@ -89,14 +74,9 @@ async def payment_process_details_api(
                 WorkerModel.salary_type == payment_type
             )
         )
-
-        workers = DBService.mappings_all(
-            session=session,
-            stmt=worker_stmt
-        )
+        workers = DBService.mappings_all(session=session, stmt=worker_stmt)
 
         payment_details = []
-
         total_payable = 0
         completed_payment_today = 0
         pending_payment_today = 0
@@ -105,33 +85,19 @@ async def payment_process_details_api(
         # Process workers
         # ---------------------------------------------------------
         for worker in workers:
-
             worker = dict(worker)
-
             worker_id = worker["id"]
-
             first_name = worker.pop("first_name")
             last_name = worker.pop("last_name")
-
-            name = (
-                f"{first_name} {last_name}"
-                if last_name
-                else first_name
-            )
-
+            name = f"{first_name} {last_name}" if last_name else first_name
             salary_type = worker["salary_type"]
-
-            salary_amount = float(
-                worker["salary_amount"] or 0
-            )
+            salary_amount = float(worker["salary_amount"] or 0)
 
             # -----------------------------------------------------
             # Attendance count
             # -----------------------------------------------------
             attendance_stmt = (
-                select(
-                    func.count(AttendanceModel.id)
-                )
+                select(func.count(AttendanceModel.id))
                 .where(
                     AttendanceModel.worker_id == worker_id,
                     AttendanceModel.attendance_date >= start_date,
@@ -140,18 +106,12 @@ async def payment_process_details_api(
                 )
             )
 
-            present_days = (
-                session.execute(
-                    attendance_stmt
-                ).scalar() or 0
-            )
+            present_days = (session.execute(attendance_stmt).scalar() or 0)
 
             # -----------------------------------------------------
             # Total days in selected period
             # -----------------------------------------------------
-            total_days = (
-                end_date - start_date
-            ).days + 1
+            total_days = (end_date - start_date).days + 1
 
             # -----------------------------------------------------
             # Calculate payable amount
@@ -159,38 +119,16 @@ async def payment_process_details_api(
             payment_amount = 0
 
             if salary_type.upper() == "DAILY":
-
-                payment_amount = (
-                    salary_amount * present_days
-                )
-
+                payment_amount = (salary_amount * present_days)
             elif salary_type.upper() == "WEEKLY":
-
                 daily_rate = salary_amount / 7
-
-                payment_amount = (
-                    daily_rate * present_days
-                )
-
+                payment_amount = (daily_rate * present_days)
             elif salary_type.upper() == "MONTHLY":
+                days_in_month = calendar.monthrange(today.year, today.month)[1]
+                daily_rate = (salary_amount / days_in_month)
+                payment_amount = (daily_rate * present_days)
 
-                days_in_month = calendar.monthrange(
-                    today.year,
-                    today.month
-                )[1]
-
-                daily_rate = (
-                    salary_amount / days_in_month
-                )
-
-                payment_amount = (
-                    daily_rate * present_days
-                )
-
-            payment_amount = round(
-                payment_amount,
-                2
-            )
+            payment_amount = round(payment_amount, 2)
 
             # -----------------------------------------------------
             # Add to total payable
@@ -239,22 +177,11 @@ async def payment_process_details_api(
                 "payment_type": payment_type,
                 "start_date": start_date,
                 "end_date": end_date,
-
                 "summary": {
-                    "total_payable": round(
-                        total_payable,
-                        2
-                    ),
-                    "pending_payment_today": round(
-                        pending_payment_today,
-                        2
-                    ),
-                    "completed_payment_today": round(
-                        completed_payment_today,
-                        2
-                    )
+                    "total_payable": round(total_payable, 2),
+                    "pending_payment_today": round(pending_payment_today, 2),
+                    "completed_payment_today": round(completed_payment_today, 2)
                 },
-
                 "workers": payment_details
             }
         )

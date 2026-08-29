@@ -11,25 +11,15 @@ import {
   Assessment,
   CalendarMonth,
   Groups,
-  Paid,
   Payments,
   PersonAdd,
   Wallet,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { workerApi } from '../../api/workerApi.js';
+import dashboardMock from '../../data/dashboard.json';
 import SectionHead from '../../components/common/SectionHead.jsx';
 import '../../styles/dashboard.css';
-
-const Sparkline = ({ points }) => (
-  <svg
-    className="dashSpark"
-    viewBox="0 0 100 30"
-    preserveAspectRatio="none"
-  >
-    <polyline points={points} />
-  </svg>
-);
 
 const attendanceSummaryFallback = {
   total_workers: null,
@@ -233,54 +223,6 @@ function getGreeting() {
 
   return 'Good Evening';
 }
-
-const DashboardKpi = ({
-  tone,
-  icon,
-  value,
-  label,
-  trend,
-  points,
-}) => (
-  <Card
-    className={`dashCard kpiCard ${tone}`}
-  >
-    <CardContent>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Box className="kpiIcon">
-          {icon}
-        </Box>
-
-        <Box
-          className={`kpiTrend ${
-            trend.includes('workers')
-              ? 'neutral'
-              : 'up'
-          }`}
-        >
-          {trend}
-        </Box>
-      </Stack>
-
-      <Typography className="kpiValue">
-        {value}
-      </Typography>
-
-      <Typography className="kpiLabel">
-        {label}
-      </Typography>
-
-      <Sparkline
-        points={points}
-      />
-    </CardContent>
-  </Card>
-);
 
 function DashboardHeroArt() {
   return (
@@ -875,7 +817,10 @@ const WidgetPaymentProgress = ({
   </>
 );
 
-function DashboardWidgets() {
+function DashboardWidgets({
+  todayLabel,
+  workerCount,
+}) {
   return (
     <Box className="dashBlock">
       <SectionHead title="Smart widgets" />
@@ -889,6 +834,11 @@ function DashboardWidgets() {
 
             <Typography className="widgetValue">
               ₹42,900
+            </Typography>
+
+            <Typography className="widgetSub">
+              <CalendarMonth fontSize="small" />
+              Today, {todayLabel} - {workerCount} workers
             </Typography>
 
             <WidgetPaymentProgress
@@ -988,49 +938,6 @@ export default function DashboardPage() {
     buildHeroStats(
       attendanceSummary,
     );
-
-  const kpis = [
-    {
-      tone: 'success',
-      icon: <Groups />,
-      value: '42',
-      label:
-        'Workers present today',
-      trend: '6%',
-      points:
-        '0,22 15,20 30,24 45,14 60,16 75,8 100,6',
-    },
-    {
-      tone: 'warning',
-      icon: <Groups />,
-      value: '8',
-      label:
-        'Workers absent today',
-      trend: '2%',
-      points:
-        '0,10 15,14 30,9 45,18 60,15 75,22 100,24',
-    },
-    {
-      tone: 'danger',
-      icon: <Paid />,
-      value: '₹18,400',
-      label:
-        'Pending daily payments',
-      trend: '12 workers',
-      points:
-        '0,6 15,12 30,10 45,20 60,17 75,25 100,23',
-    },
-    {
-      tone: 'primary',
-      icon: <Wallet />,
-      value: '₹64,200',
-      label:
-        'Pending weekly payments',
-      trend: '9 workers',
-      points:
-        '0,20 15,18 30,22 45,12 60,14 75,7 100,10',
-    },
-  ];
 
   const quick = [
     [
@@ -1180,15 +1087,6 @@ export default function DashboardPage() {
 
         </CardContent>
       </Card>
-
-      <Box className="kpiGrid">
-        {kpis.map((kpi) => (
-          <DashboardKpi
-            key={kpi.label}
-            {...kpi}
-          />
-        ))}
-      </Box>
 
       <Box className="dashBlock">
 
@@ -1431,7 +1329,10 @@ export default function DashboardPage() {
 
       </Box>
 
-      <DashboardWidgets />
+      <DashboardWidgets
+        todayLabel={shortDate}
+        workerCount={dashboardMock.totalWorkers}
+      />
 
     </Box>
   );

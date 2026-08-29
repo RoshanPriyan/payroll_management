@@ -1,4 +1,4 @@
-import { Assessment, CalendarMonth, Dashboard, Groups, Paid, Payments, Settings } from '@mui/icons-material';
+import { Assessment, CalendarMonth, Dashboard, Groups, Paid, Payments, Settings, Tune } from '@mui/icons-material';
 import { ROLES } from '../../services/auth/authSession.js';
 
 export const menuSections = [
@@ -26,6 +26,7 @@ export const menuSections = [
   {
     label: 'System',
     items: [
+      { to: '/system-configuration', label: 'System Configuration', icon: <Tune />, roles: [ROLES.ADMIN] },
       { to: '/settings', label: 'Settings', icon: <Settings />, roles: [ROLES.ADMIN] },
     ],
   },

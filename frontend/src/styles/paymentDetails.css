@@ -1,0 +1,289 @@
+.paymentDetailsPage {
+  max-width: none;
+  gap: 0;
+}
+
+.paymentDetailsPage > .MuiStack-root {
+  gap: 22px;
+}
+
+.paymentDetailsTabsWrap {
+  margin: -26px -32px 0;
+  padding: 0 32px;
+  background: #fff;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.paymentDetailsTabsWrap .MuiTabs-root {
+  min-height: 56px;
+}
+
+.paymentDetailsTabsWrap .MuiTab-root {
+  min-height: 56px;
+  padding: 0 22px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.paymentDetailsTabsWrap .MuiTab-root.Mui-selected {
+  color: #2563eb;
+}
+
+.paymentDetailsTabsWrap .MuiTabs-indicator {
+  height: 2px;
+  background: #2563eb;
+}
+
+.paymentPeriodBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1e3a8a;
+  font-weight: 800;
+}
+
+.paymentPeriodBar svg {
+  color: #4b6388;
+}
+
+.paymentPeriodBar .MuiTypography-root {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.paymentPeriodBar span {
+  color: #274472;
+  margin-right: 6px;
+}
+
+.paymentSummaryCard {
+  min-height: 128px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 22px;
+  border: 1px solid #d5e2ff;
+  border-radius: 14px;
+  background: linear-gradient(115deg, #fff 0%, #f8fbff 100%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+}
+
+.paymentSummaryCard-pending {
+  border-color: #fedb9a;
+  background: linear-gradient(115deg, #fff 0%, #fffaf1 100%);
+}
+
+.paymentSummaryCard-completed {
+  border-color: #b9e8d0;
+  background: linear-gradient(115deg, #fff 0%, #f4fffa 100%);
+}
+
+.paymentSummaryIcon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #e4edff;
+  color: #2563eb;
+}
+
+.paymentSummaryIcon svg {
+  font-size: 30px;
+}
+
+.paymentSummaryCard-pending .paymentSummaryIcon {
+  background: #fff0cf;
+  color: #f59e0b;
+}
+
+.paymentSummaryCard-completed .paymentSummaryIcon {
+  background: #dff8eb;
+  color: #0f9f6e;
+}
+
+.paymentSummaryContent {
+  min-width: 0;
+}
+
+.paymentSummaryTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.paymentSummaryTitle svg {
+  color: #64748b;
+  font-size: 15px;
+}
+
+.paymentSummaryContent strong {
+  display: block;
+  color: #0f172a;
+  font-size: 24px;
+  line-height: 1.18;
+  font-weight: 900;
+}
+
+.paymentSummaryContent span {
+  display: block;
+  margin-top: 14px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.paymentSummaryCard-pending .paymentSummaryContent span {
+  color: #d97706;
+}
+
+.paymentSummaryCard-completed .paymentSummaryContent span {
+  color: #0f8f5f;
+}
+
+.paymentWorkersSection {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.paymentWorkersSection .adminUsersSectionHead {
+  align-items: flex-start;
+  padding: 18px 20px 16px;
+}
+
+.paymentWorkersSection .adminUsersSectionHead h2 {
+  font-size: 16px;
+}
+
+.paymentModeGuide {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.paymentModeGuide b {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.paymentModeGuide span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.paymentGuideDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.paymentGuideManual {
+  background: #2563eb;
+}
+
+.paymentGuideAuto {
+  background: #0f9f6e;
+}
+
+.paymentDetailsTable {
+  min-width: 1060px;
+}
+
+.paymentDetailsTable th,
+.paymentDetailsTable td {
+  padding: 14px 18px;
+}
+
+.paymentDetailsTable th {
+  color: #64748b;
+  background: #fbfcff;
+}
+
+.paymentDetailsTable td {
+  color: #0f172a;
+}
+
+.paymentWorkerName {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.paymentWorkerName b {
+  max-width: 260px;
+  overflow: hidden;
+  color: #0f172a;
+  text-overflow: ellipsis;
+}
+
+.paymentWorkerName span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.paymentDetailsTable .workerAdminBadge {
+  width: max-content;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paymentDetailsTable .paymentModeBadgeManual {
+  background: rgba(37, 99, 235, .08);
+  color: #1d4ed8;
+}
+
+.paymentDetailsTable .paymentModeBadgeAuto {
+  background: #dcfce7;
+  color: #0f8f5f;
+}
+
+@media (max-width: 900px) {
+  .paymentDetailsTabsWrap {
+    margin: -20px -18px 0;
+    padding: 0 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .paymentSummaryCard {
+    min-height: 112px;
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .paymentSummaryIcon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .paymentSummaryContent strong {
+    font-size: 21px;
+  }
+
+  .paymentWorkersSection .adminUsersSectionHead {
+    align-items: stretch;
+  }
+
+  .paymentModeGuide {
+    justify-content: flex-start;
+    gap: 10px 14px;
+  }
+}

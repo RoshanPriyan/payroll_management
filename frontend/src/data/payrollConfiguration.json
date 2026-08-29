@@ -1,0 +1,26 @@
+{
+  "daily": {
+    "enabled": true,
+    "payout_time": "20:00"
+  },
+  "weekly": {
+    "enabled": true,
+    "week_start_day": "Monday",
+    "payout_day": "Saturday",
+    "payout_time": "19:00"
+  },
+  "monthly": {
+    "enabled": true,
+    "method": "FIXED_DATE",
+    "salary_credit_day": 2,
+    "payout_time": "19:00"
+  },
+  "salary_calculation": {
+    "calculation_method": "WORKING_DAYS"
+  },
+  "attendance_rules": {
+    "grace_period": 15,
+    "half_day_after": 4,
+    "overtime_enabled": true
+  }
+}
