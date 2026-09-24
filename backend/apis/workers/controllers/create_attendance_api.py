@@ -8,13 +8,14 @@ from global_utils import success_response, CustomException
 from apis.workers.models import WorkerModel
 from apis.workers.models import AttendanceModel
 from apis.workers.schemas import CreateAttendanceSchema
+from apis.payments.utils import payment_entry_details
 from db_service import DBService
 
 
 async def create_attendance_api(
-    data: CreateAttendanceSchema,
-    current_user: dict = Depends(require_admin),
-    session: Session = Depends(get_db)
+        data: CreateAttendanceSchema,
+        current_user: dict = Depends(require_admin),
+        session: Session = Depends(get_db)
 ) -> dict:
     try:
         data = data.model_dump()
@@ -26,7 +27,6 @@ async def create_attendance_api(
         attendance_records = []
 
         for item in workers:
-
             worker_id = item.get("worker_id")
             attendance_status = item.get("attendance_status")
 
@@ -68,6 +68,8 @@ async def create_attendance_api(
             )
 
         session.add_all(attendance_records)
+        session.flush()
+        payment_entry_details(tenant_id, session, 'DAILY', attendance_date)
         session.commit()
 
         return success_response(

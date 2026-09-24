@@ -13,8 +13,8 @@ from auth import generate_access_token
 
 
 async def user_login_api(
-    data: UserLoginSchema,
-    session: Session = Depends(get_db)
+        data: UserLoginSchema,
+        session: Session = Depends(get_db)
 ) -> dict:
     try:
         data = data.model_dump()
@@ -49,7 +49,6 @@ async def user_login_api(
             "access_token": token,
             "tenant_name": tenant_name
         }
-
         session.commit()
 
         return success_response(

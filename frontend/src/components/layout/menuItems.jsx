@@ -1,4 +1,4 @@
-import { Assessment, CalendarMonth, Dashboard, Groups, Paid, Payments, Settings, Tune } from '@mui/icons-material';
+import { Assessment, CalendarMonth, Dashboard, Groups, History, Paid, Payments, Settings, Tune } from '@mui/icons-material';
 import { ROLES } from '../../services/auth/authSession.js';
 
 export const menuSections = [
@@ -13,6 +13,7 @@ export const menuSections = [
     items: [
       { to: '/workers', label: 'Workers', icon: <Groups />, roles: [ROLES.ADMIN] },
       { to: '/attendance', label: 'Attendance', icon: <CalendarMonth />, roles: [ROLES.ADMIN] },
+      { to: '/attendance-history', label: 'Attendance History', icon: <History />, roles: [ROLES.ADMIN] },
     ],
   },
   {

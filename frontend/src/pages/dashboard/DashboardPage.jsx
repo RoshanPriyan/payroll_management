@@ -16,9 +16,10 @@ import {
   Wallet,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { dashboardApi } from '../../api/dashboardApi.js';
 import { workerApi } from '../../api/workerApi.js';
-import dashboardMock from '../../data/dashboard.json';
 import SectionHead from '../../components/common/SectionHead.jsx';
+import { money, shortDate as formatShortDate } from '../../components/common/formatters.js';
 import '../../styles/dashboard.css';
 
 const attendanceSummaryFallback = {
@@ -26,6 +27,15 @@ const attendanceSummaryFallback = {
   present_count: null,
   absent_count: null,
   half_day_count: null,
+};
+
+const dailyPayrollWidgetFallback = {
+  payment_date: '',
+  worker_count: 0,
+  total_payable: 0,
+  paid_amount: 0,
+  remaining_amount: 0,
+  paid_percentage: 0,
 };
 
 const attendanceOverviewLegend = [
@@ -37,6 +47,18 @@ const attendanceOverviewLegend = [
 function toCount(value) {
   const count = Number(value);
   return Number.isFinite(count) ? count : 0;
+}
+
+function toAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getPercentage(value) {
+  const percentage = Number(value);
+
+  if (!Number.isFinite(percentage)) return 0;
+  return Math.min(100, Math.max(0, percentage));
 }
 
 function getLocalDateValue(date) {
@@ -208,6 +230,24 @@ function getDashboardDate() {
         },
       ),
   };
+}
+
+function normalizeDailyPayrollWidget(daily) {
+  return {
+    ...dailyPayrollWidgetFallback,
+    ...(daily || {}),
+    worker_count: toCount(daily?.worker_count),
+    total_payable: toAmount(daily?.total_payable),
+    paid_amount: toAmount(daily?.paid_amount),
+    remaining_amount: toAmount(daily?.remaining_amount),
+    paid_percentage: getPercentage(daily?.paid_percentage),
+  };
+}
+
+function getPayrollWidgetDateLabel(paymentDate, fallbackLabel) {
+  return paymentDate
+    ? formatShortDate(paymentDate)
+    : fallbackLabel;
 }
 
 function getGreeting() {
@@ -819,8 +859,19 @@ const WidgetPaymentProgress = ({
 
 function DashboardWidgets({
   todayLabel,
-  workerCount,
+  dailyPayroll,
 }) {
+  const dailyPaymentDateLabel =
+    getPayrollWidgetDateLabel(
+      dailyPayroll.payment_date,
+      todayLabel,
+    );
+
+  const dailyPaidPercentage =
+    getPercentage(
+      dailyPayroll.paid_percentage,
+    );
+
   return (
     <Box className="dashBlock">
       <SectionHead title="Smart widgets" />
@@ -833,18 +884,18 @@ function DashboardWidgets({
             </Typography>
 
             <Typography className="widgetValue">
-              ₹42,900
+              {money(dailyPayroll.total_payable)}
             </Typography>
 
             <Typography className="widgetSub">
               <CalendarMonth fontSize="small" />
-              Today, {todayLabel} - {workerCount} workers
+              Today, {dailyPaymentDateLabel} - {dailyPayroll.worker_count} workers
             </Typography>
 
             <WidgetPaymentProgress
-              progress="64%"
-              paid="₹27,450"
-              left="₹15,450"
+              progress={`${dailyPaidPercentage}%`}
+              paid={money(dailyPayroll.paid_amount)}
+              left={money(dailyPayroll.remaining_amount)}
             />
           </CardContent>
         </Card>
@@ -914,6 +965,13 @@ export default function DashboardPage() {
     setWeeklyAttendance,
   ] = useState(
     () => buildWeeklyFallback(),
+  );
+
+  const [
+    dailyPayrollWidget,
+    setDailyPayrollWidget,
+  ] = useState(
+    dailyPayrollWidgetFallback,
   );
 
   const userInfo = getUserInfo();
@@ -1020,6 +1078,24 @@ export default function DashboardPage() {
       .catch((error) => {
         console.error(
           'Failed to fetch weekly attendance summary',
+          error,
+        );
+      });
+
+    dashboardApi
+      .getPayrollWidgets()
+      .then((response) => {
+        if (!isActive) return;
+
+        setDailyPayrollWidget(
+          normalizeDailyPayrollWidget(
+            response.data?.data?.daily,
+          ),
+        );
+      })
+      .catch((error) => {
+        console.error(
+          'Failed to fetch payroll widgets',
           error,
         );
       });
@@ -1331,7 +1407,7 @@ export default function DashboardPage() {
 
       <DashboardWidgets
         todayLabel={shortDate}
-        workerCount={dashboardMock.totalWorkers}
+        dailyPayroll={dailyPayrollWidget}
       />
 
     </Box>

@@ -1,7 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Enum, TIMESTAMP, ForeignKey, func
 from database import Base
-from apis.tenant.models import TenantModel
-from apis.locations.models import CountryModel, StateModel, CityModel
 
 
 class BusinessModel(Base):

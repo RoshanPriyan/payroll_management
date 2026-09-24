@@ -5,97 +5,157 @@ from sqlalchemy import select, func
 from datetime import date, timedelta
 import calendar
 import traceback
-
 from database import get_db
 from auth import require_admin
 from global_utils import success_response, CustomException
 from apis.workers.models import WorkerModel, AttendanceModel
+from apis.payments.models import PaymentHistoryModel
 from db_service import DBService
+from config import PAYMENT_TYPES
 
 
 async def payment_process_details_api(
-    payment_type: str = Query(...),
-    current_user: dict = Depends(require_admin),
-    session: Session = Depends(get_db)
+        payment_type: str = Query(...),
+        current_user: dict = Depends(require_admin),
+        session: Session = Depends(get_db)
 ) -> dict:
-
     try:
         tenant_id = current_user.get("tenant_id")
-
-        # ---------------------------------------------------------
-        # Validate payment type
-        # ---------------------------------------------------------
         payment_type = payment_type.upper()
-        allowed_payment_types = {"DAILY", "WEEKLY", "MONTHLY"}
 
-        if payment_type not in allowed_payment_types:
+        if payment_type not in PAYMENT_TYPES:
             raise CustomException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="payment_type must be daily, weekly or monthly"
+                detail=f"payment_type must be {', '.join(PAYMENT_TYPES)}"
             )
 
-        # ---------------------------------------------------------
-        # Current date
-        # ---------------------------------------------------------
         today = date.today()
 
-        # ---------------------------------------------------------
-        # Calculate date range
-        # ---------------------------------------------------------
+        # =========================================================
+        # DAILY
+        # =========================================================
         if payment_type == "DAILY":
+
             start_date = today
             end_date = today
 
+            worker_stmt = (
+                select(
+                    WorkerModel.id,
+                    WorkerModel.first_name,
+                    WorkerModel.last_name,
+                    WorkerModel.salary_type,
+                    WorkerModel.salary_amount,
+                    WorkerModel.payment_mode,
+                    PaymentHistoryModel.payment_status,
+                    PaymentHistoryModel.amount_paid
+                )
+                .select_from(WorkerModel)
+                .join(AttendanceModel, AttendanceModel.worker_id == WorkerModel.id)
+                .join(PaymentHistoryModel, PaymentHistoryModel.attendance_id == AttendanceModel.id)
+                .where(
+                    WorkerModel.tenant_id == tenant_id,
+                    WorkerModel.salary_type == "DAILY",
+                    AttendanceModel.attendance_date == today
+                )
+            )
+            workers_res = DBService.mappings_all(session=session, stmt=worker_stmt)
+
+        # =========================================================
+        # WEEKLY
+        # =========================================================
         elif payment_type == "WEEKLY":
+
             # Monday -> Sunday
             start_date = today - timedelta(days=today.weekday())
             end_date = start_date + timedelta(days=6)
+
+            # -----------------------------------------------------
+            # Get workers only
+            # DISTINCT is important because one worker can have
+            # multiple attendance records in the same week.
+            # -----------------------------------------------------
+
+            worker_stmt = (
+                select(
+                    WorkerModel.id,
+                    WorkerModel.first_name,
+                    WorkerModel.last_name,
+                    WorkerModel.salary_type,
+                    WorkerModel.salary_amount,
+                    WorkerModel.payment_mode
+                )
+                .select_from(WorkerModel)
+                .join(AttendanceModel, AttendanceModel.worker_id == WorkerModel.id)
+                .where(
+                    WorkerModel.tenant_id == tenant_id,
+                    WorkerModel.salary_type == "WEEKLY",
+                    AttendanceModel.attendance_date >= start_date,
+                    AttendanceModel.attendance_date <= end_date
+                )
+                .distinct()
+            )
+
+            workers_res = DBService.mappings_all(session=session, stmt=worker_stmt)
+
+        # =========================================================
+        # MONTHLY
+        # =========================================================
         else:
-            # First day of current month
+
             start_date = today.replace(day=1)
-            # Last day of current month
+
             last_day = calendar.monthrange(today.year, today.month)[1]
+
             end_date = today.replace(day=last_day)
 
-        # ---------------------------------------------------------
-        # Get ONLY workers matching selected payment type
-        # ---------------------------------------------------------
-        worker_stmt = (
-            select(
-                WorkerModel.id,
-                WorkerModel.first_name,
-                WorkerModel.last_name,
-                WorkerModel.salary_type,
-                WorkerModel.salary_amount,
-                WorkerModel.payment_mode,
+            worker_stmt = (
+                select(
+                    WorkerModel.id,
+                    WorkerModel.first_name,
+                    WorkerModel.last_name,
+                    WorkerModel.salary_type,
+                    WorkerModel.salary_amount,
+                    WorkerModel.payment_mode
+                )
+                .select_from(WorkerModel)
+                .join(AttendanceModel, AttendanceModel.worker_id == WorkerModel.id)
+                .where(
+                    WorkerModel.tenant_id == tenant_id,
+                    WorkerModel.salary_type == "MONTHLY",
+                    AttendanceModel.attendance_date >= start_date,
+                    AttendanceModel.attendance_date <= end_date
+                )
+                .distinct()
             )
-            .where(
-                WorkerModel.tenant_id == tenant_id,
-                WorkerModel.salary_type == payment_type
-            )
-        )
-        workers = DBService.mappings_all(session=session, stmt=worker_stmt)
 
-        payment_details = []
+            workers_res = DBService.mappings_all(session=session, stmt=worker_stmt)
+
+        # =========================================================
+        # COMMON PROCESSING
+        # =========================================================
+
         total_payable = 0
         completed_payment_today = 0
         pending_payment_today = 0
 
-        # ---------------------------------------------------------
-        # Process workers
-        # ---------------------------------------------------------
-        for worker in workers:
-            worker = dict(worker)
-            worker_id = worker["id"]
-            first_name = worker.pop("first_name")
-            last_name = worker.pop("last_name")
-            name = f"{first_name} {last_name}" if last_name else first_name
-            salary_type = worker["salary_type"]
-            salary_amount = float(worker["salary_amount"] or 0)
+        payment_details = []
 
-            # -----------------------------------------------------
-            # Attendance count
-            # -----------------------------------------------------
+        total_days = (end_date - start_date).days + 1
+
+        for worker in workers_res:
+            worker = dict(worker)
+            worker_id = worker.get("id")
+            first_name = worker.get("first_name")
+            last_name = worker.get("last_name")
+            name = f"{first_name} {last_name}" if last_name else first_name
+            salary_type = worker.get("salary_type")
+            salary_amount = float(worker.get("salary_amount") or 0)
+
+            # =====================================================
+            # GET PRESENT DAYS
+            # =====================================================
+
             attendance_stmt = (
                 select(func.count(AttendanceModel.id))
                 .where(
@@ -106,53 +166,86 @@ async def payment_process_details_api(
                 )
             )
 
-            present_days = (session.execute(attendance_stmt).scalar() or 0)
+            present_days = session.execute(attendance_stmt).scalar() or 0
 
-            # -----------------------------------------------------
-            # Total days in selected period
-            # -----------------------------------------------------
-            total_days = (end_date - start_date).days + 1
+            # =====================================================
+            # CALCULATE PAYMENT
+            # =====================================================
 
-            # -----------------------------------------------------
-            # Calculate payable amount
-            # -----------------------------------------------------
             payment_amount = 0
 
-            if salary_type.upper() == "DAILY":
+            if salary_type == "DAILY":
                 payment_amount = (salary_amount * present_days)
-            elif salary_type.upper() == "WEEKLY":
+            elif salary_type == "WEEKLY":
                 daily_rate = salary_amount / 7
-                payment_amount = (daily_rate * present_days)
-            elif salary_type.upper() == "MONTHLY":
+                payment_amount = daily_rate * present_days
+            elif salary_type == "MONTHLY":
                 days_in_month = calendar.monthrange(today.year, today.month)[1]
-                daily_rate = (salary_amount / days_in_month)
-                payment_amount = (daily_rate * present_days)
+                daily_rate = salary_amount / days_in_month
+                payment_amount = daily_rate * present_days
 
             payment_amount = round(payment_amount, 2)
 
-            # -----------------------------------------------------
-            # Add to total payable
-            # -----------------------------------------------------
-            total_payable += payment_amount
+            # =====================================================
+            # PAYMENT HISTORY
+            # =====================================================
 
-            # -----------------------------------------------------
-            # Payment status
-            #
-            # NOTE:
-            # Your current code does not have a PaymentModel.
-            # Therefore we cannot check actual completed payments.
-            #
-            # For now:
-            # If worker has payable amount -> PENDING
-            # -----------------------------------------------------
+            paid_amount = 0
             payment_status = "PENDING"
 
-            if payment_amount > 0:
-                pending_payment_today += payment_amount
+            if payment_type == "DAILY":
+                # Daily already has attendance_id
+                # and payment history entry.
 
-            # -----------------------------------------------------
-            # Worker response
-            # -----------------------------------------------------
+                paid_amount = float(worker.get("amount_paid") or 0)
+                payment_status = (worker.get("payment_status") or "PENDING")
+            else:
+                # -------------------------------------------------
+                # WEEKLY / MONTHLY
+                #
+                # PaymentHistory is created only once.
+                # Therefore don't join it with attendance above.
+                # -------------------------------------------------
+
+                payment_history_stmt = (
+                    select(
+                        PaymentHistoryModel.amount_paid,
+                        PaymentHistoryModel.payment_status
+                    )
+                    .join(
+                        AttendanceModel,
+                        PaymentHistoryModel.attendance_id
+                        == AttendanceModel.id
+                    )
+                    .where(
+                        AttendanceModel.worker_id == worker_id,
+                        PaymentHistoryModel.payment_date >= start_date,
+                        PaymentHistoryModel.payment_date <= end_date
+                    )
+                    .limit(1)
+                )
+
+                payment_history = (DBService.mappings_first(session=session, stmt=payment_history_stmt))
+
+                if payment_history:
+                    payment_history = dict(payment_history)
+
+                    paid_amount = float(payment_history.get("amount_paid") or 0)
+                    payment_status = (payment_history.get("payment_status") or "PENDING")
+
+            # =====================================================
+            # SUMMARY
+            # =====================================================
+
+            total_payable += payment_amount
+
+            if payment_status == "PAID":
+                completed_payment_today += paid_amount
+
+            # =====================================================
+            # WORKER RESPONSE
+            # =====================================================
+
             payment_details.append(
                 {
                     "id": worker_id,
@@ -162,14 +255,18 @@ async def payment_process_details_api(
                     "payment_mode": worker["payment_mode"],
                     "present_days": present_days,
                     "total_days": total_days,
-                    "payment_amount": payment_amount,
+                    "payment_amount": round(payment_amount, 2),
+                    "paid_amount": round(paid_amount, 2),
                     "payment_status": payment_status
                 }
             )
 
-        # ---------------------------------------------------------
-        # Response
-        # ---------------------------------------------------------
+        # =========================================================
+        # FINAL SUMMARY
+        # =========================================================
+
+        pending_payment_today = (total_payable - completed_payment_today)
+
         return success_response(
             status_code=status.HTTP_200_OK,
             details="Payment process details fetched successfully",
@@ -187,6 +284,7 @@ async def payment_process_details_api(
         )
 
     except SQLAlchemyError as e:
+
         raise CustomException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),

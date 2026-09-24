@@ -4,6 +4,7 @@ import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx';
 import AdminLoginPage from '../pages/admin/AdminLoginPage.jsx';
 import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx';
 import DashboardLayout from '../components/layout/DashboardLayout.jsx';
+import AttendanceHistoryPage from '../pages/attendance/AttendanceHistoryPage.jsx';
 import AttendancePage from '../pages/attendance/AttendancePage.jsx';
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import LandingPage from '../pages/landing/LandingPage.jsx';
@@ -38,6 +39,7 @@ export default function AppRoutes() {
           <Route path="/workers/add" element={<AddWorkerPage />} />
           <Route path="/workers/edit/:id" element={<EditWorkerPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
+          <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
           <Route path="/payment-details" element={<PaymentDetailsPage />} />
           <Route path="/payroll-configuration" element={<PayrollConfigurationPage />} />
           <Route path="/system-configuration" element={<PayrollConfigurationPage />} />
