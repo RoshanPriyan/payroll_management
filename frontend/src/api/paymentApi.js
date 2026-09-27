@@ -2,6 +2,9 @@ import axiosClient from '../services/axiosClient.js';
 
 export const paymentApi = {
   getPayments: (params) => axiosClient.get('/payments', { params }),
+  getPaymentHistory: (payload) => {
+    return axiosClient.post('/v1/payment/history', payload);
+  },
   getPaymentById: (id) => axiosClient.get(`/payments/${id}`),
   getPaymentDetails: (paymentType) => axiosClient.get('/v1/worker/payment-detail-list', {
     params: { payment_type: paymentType },

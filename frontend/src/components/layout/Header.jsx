@@ -212,7 +212,7 @@ function LocationSelect({ placeholder, value, displayName, options, loading, onC
   );
 }
 
-export default function Header({ mobile, title, onOpenSidebar }) {
+export default function Header({ mobile, title, subtitle, onOpenSidebar }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [savedProfile, setSavedProfile] = useState(() => getUserInfo());
   const [profileForm, setProfileForm] = useState(() => getInitialProfileForm(savedProfile));
@@ -519,7 +519,10 @@ export default function Header({ mobile, title, onOpenSidebar }) {
             <Menu />
           </IconButton>
         )}
-        <Typography className="pageTitle">{title}</Typography>
+        <Box>
+          <Typography className="pageTitle">{title}</Typography>
+          {subtitle && <Typography className="muted">{subtitle}</Typography>}
+        </Box>
       </Stack>
       <Stack className="topbarRight" direction="row" alignItems="center" gap={1.5}>
         <Box component="button" type="button" className="profilePill profileButton" onClick={handleOpenProfile}>

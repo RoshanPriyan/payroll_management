@@ -10,12 +10,16 @@ export default function DashboardLayout() {
   const mobile = useMediaQuery('(max-width:900px)');
   const location = useLocation();
   const title = menuItems.find((item) => item.to === location.pathname)?.label || 'Payroll';
+  const subtitle = {
+    '/history': 'Track every salary payment in one place.',
+    '/attendance-history': 'View and track worker attendance records',
+  }[location.pathname];
 
   return (
     <Box className="shell">
       <Sidebar mobile={mobile} open={open} onClose={() => setOpen(false)} />
       <Box className="main">
-        <Header mobile={mobile} title={title} onOpenSidebar={() => setOpen(true)} />
+        <Header mobile={mobile} title={title} subtitle={subtitle} onOpenSidebar={() => setOpen(true)} />
         <Outlet />
       </Box>
     </Box>

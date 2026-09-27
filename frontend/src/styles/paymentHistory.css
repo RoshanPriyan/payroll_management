@@ -1,0 +1,10 @@
+.paymentHistoryGridWrap{overflow-x:auto}
+.paymentHistoryGrid.MuiDataGrid-root{min-width:900px;border:0!important;border-radius:0!important;color:#0f172a;font-size:13px}
+.paymentHistoryGrid .MuiDataGrid-columnHeaders{min-height:42px!important;background:rgba(248,250,252,.75)!important;color:#94a3b8;border-bottom:1px solid rgba(15,23,42,.08)}
+.paymentHistoryGrid .MuiDataGrid-columnHeader{padding:0 20px!important}
+.paymentHistoryGrid .MuiDataGrid-columnHeaderTitle{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.paymentHistoryGrid .MuiDataGrid-columnSeparator{display:none}
+.paymentHistoryGrid .MuiDataGrid-cell{padding:0 20px!important;border-top:0!important;border-bottom:1px solid rgba(15,23,42,.08);font-size:13px}
+.paymentHistoryGrid .MuiDataGrid-row:last-of-type .MuiDataGrid-cell{border-bottom:0}
+.paymentHistoryGrid .MuiDataGrid-row:hover{background:rgba(248,250,252,.75)}
+.paymentHistoryGrid .MuiDataGrid-footerContainer{border-top:1px solid rgba(15,23,42,.08)}

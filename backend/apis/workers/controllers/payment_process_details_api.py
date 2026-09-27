@@ -35,7 +35,6 @@ async def payment_process_details_api(
         # DAILY
         # =========================================================
         if payment_type == "DAILY":
-
             start_date = today
             end_date = today
 
@@ -48,7 +47,8 @@ async def payment_process_details_api(
                     WorkerModel.salary_amount,
                     WorkerModel.payment_mode,
                     PaymentHistoryModel.payment_status,
-                    PaymentHistoryModel.amount_paid
+                    PaymentHistoryModel.amount_paid,
+                    AttendanceModel.attendance_status
                 )
                 .select_from(WorkerModel)
                 .join(AttendanceModel, AttendanceModel.worker_id == WorkerModel.id)
@@ -116,7 +116,8 @@ async def payment_process_details_api(
                     WorkerModel.last_name,
                     WorkerModel.salary_type,
                     WorkerModel.salary_amount,
-                    WorkerModel.payment_mode
+                    WorkerModel.payment_mode,
+                    AttendanceModel.attendance_status
                 )
                 .select_from(WorkerModel)
                 .join(AttendanceModel, AttendanceModel.worker_id == WorkerModel.id)
@@ -151,6 +152,7 @@ async def payment_process_details_api(
             name = f"{first_name} {last_name}" if last_name else first_name
             salary_type = worker.get("salary_type")
             salary_amount = float(worker.get("salary_amount") or 0)
+            attendance_status = worker.get("attendance_status")
 
             # =====================================================
             # GET PRESENT DAYS
@@ -162,7 +164,7 @@ async def payment_process_details_api(
                     AttendanceModel.worker_id == worker_id,
                     AttendanceModel.attendance_date >= start_date,
                     AttendanceModel.attendance_date <= end_date,
-                    AttendanceModel.attendance_status == "PRESENT"
+                    AttendanceModel.attendance_status.in_(["PRESENT", "HALF_DAY"])
                 )
             )
 
@@ -175,7 +177,11 @@ async def payment_process_details_api(
             payment_amount = 0
 
             if salary_type == "DAILY":
-                payment_amount = (salary_amount * present_days)
+                if attendance_status == "HALF_DAY":
+                    payment_amount = (salary_amount * 0.5)
+                    present_days = 0.5
+                else:
+                    payment_amount = (salary_amount * present_days)
             elif salary_type == "WEEKLY":
                 daily_rate = salary_amount / 7
                 payment_amount = daily_rate * present_days
@@ -212,11 +218,7 @@ async def payment_process_details_api(
                         PaymentHistoryModel.amount_paid,
                         PaymentHistoryModel.payment_status
                     )
-                    .join(
-                        AttendanceModel,
-                        PaymentHistoryModel.attendance_id
-                        == AttendanceModel.id
-                    )
+                    .join(AttendanceModel, PaymentHistoryModel.attendance_id == AttendanceModel.id)
                     .where(
                         AttendanceModel.worker_id == worker_id,
                         PaymentHistoryModel.payment_date >= start_date,
@@ -284,7 +286,6 @@ async def payment_process_details_api(
         )
 
     except SQLAlchemyError as e:
-
         raise CustomException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),

@@ -10,6 +10,7 @@ from global_utils import success_response, CustomException
 from apis.workers.models import AttendanceModel, WorkerModel
 from apis.workers.schemas import AttendanceHistorySchema
 from db_service import DBService
+from apis.users.utils import get_full_name
 
 
 async def attendance_history_api(
@@ -62,7 +63,7 @@ async def attendance_history_api(
             first_name = data.pop("first_name")
             last_name = data.pop("last_name")
 
-            data["username"] = f"{first_name} {last_name}" if last_name else first_name
+            data["username"] = get_full_name(first_name, last_name)
             attendance_history_res[index] = data
 
         total_pages = ceil(total_records / payload.limit) if total_records else 0

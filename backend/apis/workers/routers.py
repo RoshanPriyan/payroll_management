@@ -23,4 +23,4 @@ router.add_api_route("/mark-attendance", create_attendance_api, methods=["POST"]
 router.add_api_route("/attendance-summary", attendance_summary_api, methods=["GET"])
 router.add_api_route("/payment-detail-list", payment_process_details_api, methods=["GET"])
 router.add_api_route("/import-worker", import_worker_api, methods=["POST"])
-router.add_api_route("/attendance-history", attendance_history_api, methods=["GET"])
+router.add_api_route("/attendance-history", attendance_history_api, methods=["POST"])

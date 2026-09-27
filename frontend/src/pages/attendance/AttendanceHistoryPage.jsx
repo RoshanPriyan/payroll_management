@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Box,
@@ -7,7 +7,6 @@ import {
   CardContent,
   Grid,
   IconButton,
-  InputAdornment,
   MenuItem,
   Select,
   Stack,
@@ -16,19 +15,11 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  CalendarMonth,
   ChevronLeft,
   ChevronRight,
-  Download,
-  EventAvailable,
-  Groups,
-  Refresh,
   Search,
-  WorkOff,
 } from '@mui/icons-material';
 import { attendanceApi } from '../../api/attendanceApi.js';
-import { workerApi } from '../../api/workerApi.js';
-import StatCard from '../../components/common/StatCard.jsx';
 import StatusChip from '../../components/common/StatusChip.jsx';
 import '../../styles/adminUsers.css';
 
@@ -36,7 +27,8 @@ const PAGE_LIMIT_OPTIONS = [10, 25, 50];
 const STATUS_OPTIONS = [
   { label: 'All', value: '' },
   { label: 'Present', value: 'PRESENT' },
-  { label: 'Leave', value: 'LEAVE' },
+  { label: 'Absent', value: 'ABSENT' },
+  { label: 'Half Day', value: 'HALF_DAY' },
 ];
 
 function getApiMessage(apiError, fallback) {
@@ -46,25 +38,6 @@ function getApiMessage(apiError, fallback) {
     || apiError.response?.data?.message
     || fallback
   );
-}
-
-function getWorkerItems(data) {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.data?.workers)) return data.data.workers;
-  if (Array.isArray(data?.workers)) return data.workers;
-  return [];
-}
-
-function normalizeWorker(worker, index) {
-  const firstName = worker.first_name || worker.firstName || '';
-  const lastName = worker.last_name || worker.lastName || '';
-  const name = worker.name || worker.username || [firstName, lastName].filter(Boolean).join(' ') || 'Worker';
-
-  return {
-    id: worker.id || worker.worker_id || worker.workerId || index + 1,
-    name,
-  };
 }
 
 function normalizeAttendanceRecord(record) {
@@ -96,40 +69,12 @@ function getStatusLabel(status) {
   return normalizedStatus.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function downloadCsv(records) {
-  const rows = [
-    ['Date', 'Worker Name', 'Status', 'Remarks'],
-    ...records.map((record) => [
-      record.date,
-      record.username,
-      getStatusLabel(record.status),
-      record.remarks || '-',
-    ]),
-  ];
-  const csv = rows
-    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-
-  link.href = url;
-  link.download = 'attendance-history.csv';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-}
-
 export default function AttendanceHistoryPage() {
   const [records, setRecords] = useState([]);
-  const [workers, setWorkers] = useState([]);
   const [filters, setFilters] = useState({
     status: '',
     startDate: '',
     endDate: '',
-    workerName: '',
-    search: '',
   });
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -140,7 +85,6 @@ export default function AttendanceHistoryPage() {
     next_page: null,
   });
   const [loading, setLoading] = useState(true);
-  const [loadingWorkers, setLoadingWorkers] = useState(false);
   const [error, setError] = useState('');
 
   const loadAttendanceHistory = useCallback(async () => {
@@ -194,56 +138,6 @@ export default function AttendanceHistoryPage() {
     return () => window.clearTimeout(timer);
   }, [loadAttendanceHistory]);
 
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadWorkers() {
-      setLoadingWorkers(true);
-
-      try {
-        const response = await workerApi.getWorkers();
-        if (!ignore) setWorkers(getWorkerItems(response.data).map(normalizeWorker));
-      } catch {
-        if (!ignore) setWorkers([]);
-      } finally {
-        if (!ignore) setLoadingWorkers(false);
-      }
-    }
-
-    const timer = window.setTimeout(loadWorkers, 0);
-
-    return () => {
-      ignore = true;
-      window.clearTimeout(timer);
-    };
-  }, []);
-
-  const filteredRecords = useMemo(() => {
-    const search = filters.search.trim().toLowerCase();
-    const workerName = filters.workerName.trim().toLowerCase();
-
-    return records.filter((record) => {
-      const matchesWorker = !workerName || record.username.toLowerCase() === workerName;
-      const matchesSearch = !search || `${record.username} ${record.remarks || ''}`.toLowerCase().includes(search);
-
-      return matchesWorker && matchesSearch;
-    });
-  }, [filters.search, filters.workerName, records]);
-
-  const summary = useMemo(() => {
-    const presentDays = records.filter((record) => record.status === 'PRESENT').length;
-    const leaveDays = records.filter((record) => record.status === 'LEAVE').length;
-    const uniqueWorkers = new Set(records.map((record) => record.username)).size;
-    const attendanceRate = records.length ? Math.round((presentDays / records.length) * 100) : 0;
-
-    return {
-      presentDays,
-      leaveDays,
-      uniqueWorkers,
-      attendanceRate,
-    };
-  }, [records]);
-
   const totalPages = Math.max(1, Number(pagination.total_pages || 1));
   const currentPage = Number(pagination.current_page || page);
 
@@ -257,8 +151,6 @@ export default function AttendanceHistoryPage() {
       status: '',
       startDate: '',
       endDate: '',
-      workerName: '',
-      search: '',
     });
     setPage(1);
   };
@@ -270,21 +162,6 @@ export default function AttendanceHistoryPage() {
 
   return (
     <Box className="page">
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" gap={2} mb={2}>
-        <Box>
-          <Typography variant="h5">Attendance History</Typography>
-          <Typography className="muted">View and track worker attendance records</Typography>
-        </Box>
-        <Stack direction="row" gap={1} flexWrap="wrap">
-          <Button variant="outlined" startIcon={<Download />} onClick={() => downloadCsv(filteredRecords)} disabled={filteredRecords.length === 0}>
-            Export CSV
-          </Button>
-          <Button variant="outlined" startIcon={<Refresh />} onClick={loadAttendanceHistory} disabled={loading}>
-            Refresh
-          </Button>
-        </Stack>
-      </Stack>
-
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Grid container spacing={2}>
@@ -297,25 +174,15 @@ export default function AttendanceHistoryPage() {
               <TextField fullWidth size="small" type="date" value={filters.endDate} onChange={(event) => handleFilterChange('endDate', event.target.value)} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <Typography className="muted" mb={0.75}>Worker</Typography>
-              <Select fullWidth size="small" value={filters.workerName} onChange={(event) => handleFilterChange('workerName', event.target.value)} disabled={loadingWorkers}>
-                <MenuItem value="">All Workers</MenuItem>
-                {workers.map((worker) => (
-                  <MenuItem key={worker.id} value={worker.name}>{worker.name}</MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <Typography className="muted" mb={0.75}>Attendance Status</Typography>
               <Select fullWidth size="small" value={filters.status} onChange={(event) => handleFilterChange('status', event.target.value)}>
                 {STATUS_OPTIONS.map((option) => <MenuItem key={option.value || 'all'} value={option.value}>{option.label}</MenuItem>)}
               </Select>
             </Grid>
-            <Grid size={{ xs: 12, md: 2.4 }}>
-              <Typography className="muted" mb={0.75}>&nbsp;</Typography>
-              <Stack direction="row" gap={1}>
-                <Button fullWidth variant="contained" startIcon={<Search />} onClick={loadAttendanceHistory} disabled={loading}>Search</Button>
-                <Button variant="outlined" color="inherit" onClick={handleReset}>Reset</Button>
+            <Grid size={{ xs: 12, md: 4.8 }} sx={{ display: 'flex', alignItems: 'flex-end' }}>
+              <Stack width="100%" direction="row" justifyContent={{ xs: 'stretch', sm: 'flex-end' }} gap={1}>
+                <Button sx={{ minWidth: 120, flex: { xs: 1, sm: 'initial' } }} variant="contained" startIcon={<Search />} onClick={loadAttendanceHistory} disabled={loading}>Search</Button>
+                <Button sx={{ minWidth: 96, flex: { xs: 1, sm: 'initial' } }} variant="outlined" color="inherit" onClick={handleReset}>Reset</Button>
               </Stack>
             </Grid>
           </Grid>
@@ -324,34 +191,17 @@ export default function AttendanceHistoryPage() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Grid container spacing={2} mb={2}>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<Groups />} title="Workers on Page" value={summary.uniqueWorkers} color="#2563eb" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<EventAvailable />} title="Present Days" value={summary.presentDays} color="#16a34a" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<WorkOff />} title="Leave Days" value={summary.leaveDays} color="#dc2626" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<CalendarMonth />} title="Attendance Rate" value={`${summary.attendanceRate}%`} color="#7c3aed" />
-        </Grid>
-      </Grid>
-
-      <section className="adminUsersSection">
+      <section className="adminUsersSection attendanceHistorySection">
         <Box className="adminUsersSectionHead">
           <Box>
             <h2>Attendance Records</h2>
           </Box>
-          <TextField
-            size="small"
-            placeholder="Search worker name"
-            value={filters.search}
-            onChange={(event) => handleFilterChange('search', event.target.value)}
-            sx={{ width: { xs: '100%', sm: 280 } }}
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> } }}
-          />
+          <Box className="attendanceModeGuide">
+            <b>Attendance Mode Guide:</b>
+            <span><i className="attendanceGuideDot attendanceGuidePresent" />Present</span>
+            <span><i className="attendanceGuideDot attendanceGuideLeave" />Absent</span>
+            <span><i className="attendanceGuideDot attendanceGuideHalfDay" />Half Day</span>
+          </Box>
         </Box>
 
         <Box className="adminUsersTableWrap">
@@ -370,7 +220,7 @@ export default function AttendanceHistoryPage() {
                   <td colSpan={4}><Box className="adminUsersState">Loading attendance history...</Box></td>
                 </tr>
               )}
-              {!loading && !error && filteredRecords.map((record) => (
+              {!loading && !error && records.map((record) => (
                 <tr key={record.id || `${record.date}-${record.username}`}>
                   <td>{formatDateLabel(record.date)}</td>
                   <td><b>{record.username}</b></td>
@@ -378,7 +228,7 @@ export default function AttendanceHistoryPage() {
                   <td className="adminUsersEmail">{record.remarks || '-'}</td>
                 </tr>
               ))}
-              {!loading && !error && filteredRecords.length === 0 && (
+              {!loading && !error && records.length === 0 && (
                 <tr>
                   <td colSpan={4}><Box className="adminUsersState">No attendance records found.</Box></td>
                 </tr>
