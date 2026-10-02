@@ -201,6 +201,13 @@ export default function SettingsPage() {
     };
   }, [loadCities, loadCountries, loadStates]);
 
+  useEffect(() => {
+    if (!successMessage) return undefined;
+
+    const timer = window.setTimeout(() => setSuccessMessage(''), 5000);
+    return () => window.clearTimeout(timer);
+  }, [successMessage]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 

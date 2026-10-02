@@ -170,7 +170,7 @@ function LocationSelect({ placeholder, value, displayName, options, loading, onC
           },
         }}
         renderValue={(selected) => {
-          if (selected === fallbackValue) {
+          if (fallbackDisplayName && selected === fallbackValue) {
             return fallbackDisplayName;
           }
 
