@@ -875,7 +875,9 @@
   }
 
   /* ---------------- Tenant API data ---------------- */
-  const ADMIN_API_BASE_URL = 'http://localhost:8000/api';
+  const ADMIN_API_BASE_URL = new URLSearchParams(window.location.search)
+    .get('apiBaseUrl')
+    ?.replace(/\/+$/, '');
   const tbody = document.getElementById('tenantTableBody');
   const statValues = document.querySelectorAll('.stat-value');
 
@@ -992,6 +994,11 @@
   }
 
   async function loadTenants(){
+    if(!ADMIN_API_BASE_URL){
+      tbody.innerHTML = '<tr><td colspan="8"><div class="table-state error">API base URL is not configured. Set VITE_API_BASE_URL in the frontend environment.</div></td></tr>';
+      return;
+    }
+
     tbody.innerHTML = '<tr><td colspan="8"><div class="table-state">Loading tenants...</div></td></tr>';
 
     try {
