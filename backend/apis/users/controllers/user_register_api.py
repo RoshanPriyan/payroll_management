@@ -82,7 +82,8 @@ async def user_register_api(
         user_profile = UserProfileModel(
             user_id=user_data.id,
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            tenant_id=tenant_data.id
         )
         session.add(user_profile)
         session.commit()

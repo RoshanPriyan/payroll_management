@@ -16,6 +16,7 @@ async def user_detail_api(
 ) -> dict:
     try:
         user_id = token_user.get("user_id")
+        tenant_id = token_user.get("tenant_id")
         existing_user_stmt = (
             select(
                 UserModel.id,
@@ -30,10 +31,10 @@ async def user_detail_api(
             )
             .select_from(UserModel)
             .join(UserProfileModel)
-            .join(CountryModel, CountryModel.id == UserProfileModel.country_id)
-            .join(StateModel, StateModel.id == UserProfileModel.state_id)
-            .join(CityModel, CityModel.id == UserProfileModel.city_id)
-            .where(UserModel.id == user_id)
+            .outerjoin(CountryModel, CountryModel.id == UserProfileModel.country_id)
+            .outerjoin(StateModel, StateModel.id == UserProfileModel.state_id)
+            .outerjoin(CityModel, CityModel.id == UserProfileModel.city_id)
+            .where(UserModel.id == user_id, UserModel.tenant_id == tenant_id)
         )
         existing_user = session.execute(existing_user_stmt).mappings().first()
 
