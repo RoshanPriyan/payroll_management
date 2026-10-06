@@ -15,7 +15,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-@app.get('/')
+@app.get('/health')
 async def health():
-    print(get_db())
     return {"message": "Application Health Check"}
