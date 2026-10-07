@@ -5,6 +5,10 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
   IconButton,
   MenuItem,
@@ -17,6 +21,7 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  Edit,
   Search,
 } from '@mui/icons-material';
 import { attendanceApi } from '../../api/attendanceApi.js';
@@ -47,6 +52,7 @@ function normalizeAttendanceRecord(record) {
     status: record.attendance_status || '',
     remarks: record.remarks || '',
     username: record.username || record.worker_name || 'Worker',
+    canEdit: record.can_edit === true,
   };
 }
 
@@ -86,6 +92,14 @@ export default function AttendanceHistoryPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editRecord, setEditRecord] = useState(null);
+  const [editForm, setEditForm] = useState({
+    status: 'PRESENT',
+    remarks: '',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const loadAttendanceHistory = useCallback(async () => {
     setLoading(true);
@@ -138,6 +152,16 @@ export default function AttendanceHistoryPage() {
     return () => window.clearTimeout(timer);
   }, [loadAttendanceHistory]);
 
+  useEffect(() => {
+    if (!successMessage) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setSuccessMessage('');
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [successMessage]);
+
   const totalPages = Math.max(1, Number(pagination.total_pages || 1));
   const currentPage = Number(pagination.current_page || page);
 
@@ -158,6 +182,51 @@ export default function AttendanceHistoryPage() {
   const handleLimitChange = (event) => {
     setLimit(Number(event.target.value));
     setPage(1);
+  };
+
+  const handleOpenEdit = (record) => {
+    setEditRecord(record);
+    setEditForm({
+      status: record.status || 'PRESENT',
+      remarks: record.remarks || '',
+    });
+    setEditError('');
+  };
+
+  const handleCloseEdit = () => {
+    if (savingEdit) return;
+
+    setEditRecord(null);
+    setEditError('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editRecord?.id) {
+      setEditError('Unable to update attendance because the record id is missing.');
+      return;
+    }
+
+    setSavingEdit(true);
+    setEditError('');
+    setSuccessMessage('');
+
+    const remarks = editForm.remarks.trim();
+    const payload = {
+      id: editRecord.id,
+      status: editForm.status,
+      remarks: remarks || null,
+    };
+
+    try {
+      const response = await attendanceApi.updateWorkerAttendance(payload);
+      setSuccessMessage(response.data?.details || response.data?.message || 'Attendance updated successfully.');
+      setEditRecord(null);
+      await loadAttendanceHistory();
+    } catch (apiError) {
+      setEditError(getApiMessage(apiError, 'Unable to update attendance. Please try again.'));
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   return (
@@ -190,6 +259,7 @@ export default function AttendanceHistoryPage() {
       </Card>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
 
       <section className="adminUsersSection attendanceHistorySection">
         <Box className="adminUsersSectionHead">
@@ -212,12 +282,13 @@ export default function AttendanceHistoryPage() {
                 <th>Worker Name</th>
                 <th>Status</th>
                 <th>Remarks</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={4}><Box className="adminUsersState">Loading attendance history...</Box></td>
+                  <td colSpan={5}><Box className="adminUsersState">Loading attendance history...</Box></td>
                 </tr>
               )}
               {!loading && !error && records.map((record) => (
@@ -226,16 +297,25 @@ export default function AttendanceHistoryPage() {
                   <td><b>{record.username}</b></td>
                   <td><StatusChip value={getStatusLabel(record.status)} /></td>
                   <td className="adminUsersEmail">{record.remarks || '-'}</td>
+                  <td>
+                    {record.canEdit && (
+                      <Tooltip title="Edit attendance">
+                        <IconButton size="small" aria-label={`Edit attendance for ${record.username}`} onClick={() => handleOpenEdit(record)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </td>
                 </tr>
               ))}
               {!loading && !error && records.length === 0 && (
                 <tr>
-                  <td colSpan={4}><Box className="adminUsersState">No attendance records found.</Box></td>
+                  <td colSpan={5}><Box className="adminUsersState">No attendance records found.</Box></td>
                 </tr>
               )}
               {!loading && error && (
                 <tr>
-                  <td colSpan={4}><Box className="adminUsersState">Attendance history could not be loaded.</Box></td>
+                  <td colSpan={5}><Box className="adminUsersState">Attendance history could not be loaded.</Box></td>
                 </tr>
               )}
             </tbody>
@@ -268,6 +348,49 @@ export default function AttendanceHistoryPage() {
           </Stack>
         </Stack>
       </section>
+
+      <Dialog open={!!editRecord} onClose={handleCloseEdit} fullWidth maxWidth="xs">
+        <DialogTitle>Edit Attendance</DialogTitle>
+        <DialogContent>
+          {editError && <Alert severity="error" sx={{ mb: 2 }}>{editError}</Alert>}
+          <Stack gap={2} sx={{ pt: 1 }}>
+            <Box>
+              <Typography className="muted" mb={0.75}>Worker Name</Typography>
+              <Typography fontWeight={800}>{editRecord?.username || '-'}</Typography>
+            </Box>
+            <Box>
+              <Typography className="muted" mb={0.75}>Attendance Status</Typography>
+              <Select
+                fullWidth
+                size="small"
+                value={editForm.status}
+                onChange={(event) => setEditForm((current) => ({ ...current, status: event.target.value }))}
+              >
+                {STATUS_OPTIONS.filter((option) => option.value).map((option) => (
+                  <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                ))}
+              </Select>
+            </Box>
+            <Box>
+              <Typography className="muted" mb={0.75}>Remarks</Typography>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                minRows={3}
+                value={editForm.remarks}
+                onChange={(event) => setEditForm((current) => ({ ...current, remarks: event.target.value }))}
+              />
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" color="inherit" onClick={handleCloseEdit} disabled={savingEdit}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveEdit} disabled={savingEdit}>
+            {savingEdit ? 'Saving...' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

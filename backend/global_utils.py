@@ -42,3 +42,24 @@ def generate_tenant_code(company_name: str) -> str:
             company_name.strip().upper().replace(" ", "_")+ "_"+ datetime.now().strftime("%Y%m%d%H%M%S")
             + str(random.randint(100, 999))
             )
+
+
+def get_ip_address(request):
+    forwarded_for = request.headers.get("X-Forwarded-For")
+
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    return request.client.host if request.client else None
+
+
+def get_device_type(request):
+    user_agent = request.headers.get("user-agent", "").lower()
+
+    if any(device in user_agent for device in ["ipad", "tablet"]):
+        return "TABLET"
+
+    if any(device in user_agent for device in ["iphone", "android", "mobile"]):
+        return "MOBILE"
+
+    return "BROWSER"

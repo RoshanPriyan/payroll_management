@@ -7,6 +7,7 @@ from apis.platform_users.routers import router as admin_router
 from apis.workers.routers import router as worker_router
 from apis.dashboard.routers import router as dashboard_router
 from apis.payments.routers import router as payment_router
+from apis.audit_logs.routers import router as audit_router
 
 
 router = APIRouter()
@@ -19,3 +20,4 @@ router.include_router(admin_router)
 router.include_router(worker_router)
 router.include_router(dashboard_router)
 router.include_router(payment_router)
+router.include_router(audit_router)

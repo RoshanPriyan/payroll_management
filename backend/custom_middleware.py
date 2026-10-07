@@ -2,7 +2,7 @@ from fastapi import Request, Depends
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from global_utils import CustomException
+from global_utils import CustomException, get_ip_address, get_device_type
 import traceback
 from apis.audit_logs.utils import save_audit_log
 from auth import validate_access_token
@@ -17,6 +17,9 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
 
             user_id = None
             tenant_id = None
+            ip_address = None
+            device_type = None
+            status_code = None
 
             if auth_header and auth_header.startswith("Bearer "):
                 token = auth_header.split(" ")[1]
@@ -28,13 +31,20 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                     tenant_id = payload.get("tenant_id")
 
             response = await call_next(request)
+
+            ip_address = get_ip_address(request)
+            device_type = get_device_type(request)
+            status_code = status_code
+            
             if request.url.path not in excluded_paths:
                 await save_audit_log(
                     tenant_id=tenant_id,
                     user_id=user_id,
                     method=request.method,
                     endpoint=request.url.path,
-                    status_code=response.status_code
+                    ip_address=ip_address,
+                    device_type=device_type,
+                    status_code=status_code
                     )
             return response
 
@@ -46,7 +56,9 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                     user_id=user_id,
                     method=request.method,
                     endpoint=request.url.path,
-                    status_code=response.status_code
+                    ip_address=ip_address,
+                    device_type=device_type,
+                    status_code=status_code
                     )
             return JSONResponse(
                 status_code=e.status_code,
@@ -64,7 +76,9 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                     user_id=user_id,
                     method=request.method,
                     endpoint=request.url.path,
-                    status_code=response.status_code
+                    ip_address=ip_address,
+                    device_type=device_type,
+                    status_code=status_code
                     )
             return JSONResponse(
                 status_code=500,
@@ -84,7 +98,9 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                     user_id=user_id,
                     method=request.method,
                     endpoint=request.url.path,
-                    status_code=response.status_code
+                    ip_address=ip_address,
+                    device_type=device_type,
+                    status_code=status_code
                     )
             return JSONResponse(
                 status_code=500,

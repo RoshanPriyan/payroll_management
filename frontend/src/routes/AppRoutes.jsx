@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminRoute from './AdminRoute.jsx';
+import AdminAuditLogsPage from '../pages/admin/AdminAuditLogsPage.jsx';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx';
 import AdminLoginPage from '../pages/admin/AdminLoginPage.jsx';
 import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx';
@@ -29,6 +30,7 @@ export default function AppRoutes() {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route element={<AdminRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>

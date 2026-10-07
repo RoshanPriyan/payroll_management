@@ -48,6 +48,12 @@
 .adminUsersStatus::before{content:"";width:6px;height:6px;border-radius:50%;background:#16a34a}
 .adminUsersStatusInactive{background:#fbbf24;color:#f59e0b}
 .adminUsersStatusInactive::before{background:#f59e0b}
+.adminUsersStatusSuccess{background:rgba(34,197,94,.12);color:#16a34a}
+.adminUsersStatusSuccess::before{background:#16a34a}
+.adminUsersStatusWarning{background:rgba(245,158,11,.14);color:#d97706}
+.adminUsersStatusWarning::before{background:#d97706}
+.adminUsersStatusDanger{background:rgba(239,68,68,.12);color:#dc2626}
+.adminUsersStatusDanger::before{background:#dc2626}
 .adminUsersStatusControl{display:inline-flex;align-items:center;gap:8px;color:#64748b;font-size:12px;font-weight:800;min-width:92px}
 .adminUsersStatusControl .MuiSwitch-root{width:42px;height:26px;padding:0}
 .adminUsersStatusControl .MuiSwitch-switchBase{padding:3px}

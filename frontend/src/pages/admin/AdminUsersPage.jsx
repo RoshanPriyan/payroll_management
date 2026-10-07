@@ -1,74 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Add,
-  Assessment,
-  BarChart,
-  Business,
-  CreditCard,
-  Dashboard,
-  Groups,
-  Logout,
   Refresh,
-  Settings,
 } from '@mui/icons-material';
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   CircularProgress,
   Stack,
   Switch,
-  Typography,
 } from '@mui/material';
-import { NavLink, useNavigate } from 'react-router-dom';
 import { adminUserApi } from '../../api/adminUserApi.js';
-import { adminAuthService } from '../../services/adminAuthService.js';
+import AdminShell from '../../components/admin/AdminShell.jsx';
 import '../../styles/landing.css';
 import '../../styles/adminUsers.css';
-
-const navSections = [
-  {
-    label: 'Overview',
-    items: [{ to: '/admin/dashboard', label: 'Dashboard', icon: <Dashboard /> }],
-  },
-  {
-    label: 'Management',
-    items: [
-      { to: '/admin/dashboard#tenants', label: 'Tenants', icon: <Business /> },
-      { to: '/admin/dashboard#businesses', label: 'Businesses', icon: <Business /> },
-      { to: '/admin/users', label: 'Users', icon: <Groups /> },
-    ],
-  },
-  {
-    label: 'Revenue',
-    items: [
-      { to: '/admin/dashboard#subscriptions', label: 'Subscriptions', icon: <CreditCard /> },
-      { to: '/admin/dashboard#revenue', label: 'Revenue', icon: <BarChart /> },
-      { to: '/admin/dashboard#reports', label: 'Reports', icon: <Assessment /> },
-    ],
-  },
-  {
-    label: 'System',
-    items: [{ to: '/admin/dashboard#settings', label: 'Settings', icon: <Settings /> }],
-  },
-];
-
-function getStoredAdminName() {
-  const firstName = localStorage.getItem('first_name') || '';
-  const lastName = localStorage.getItem('last_name') || '';
-  return [firstName, lastName].filter(Boolean).join(' ') || 'Super Admin';
-}
-
-function getInitials(name) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0))
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || 'SA';
-}
 
 function formatDate(value) {
   if (!value) return '-';
@@ -114,7 +60,6 @@ const emptyRegisterForm = {
 };
 
 export default function AdminUsersPage() {
-  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [timestamp, setTimestamp] = useState('');
   const [loading, setLoading] = useState(true);
@@ -126,8 +71,6 @@ export default function AdminUsersPage() {
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [savingUser, setSavingUser] = useState(false);
   const [statusUpdatingUserId, setStatusUpdatingUserId] = useState(null);
-  const adminName = useMemo(() => getStoredAdminName(), []);
-  const initials = useMemo(() => getInitials(adminName), [adminName]);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -178,11 +121,6 @@ export default function AdminUsersPage() {
     const timer = window.setTimeout(() => setRegisterSuccess(''), 3000);
     return () => window.clearTimeout(timer);
   }, [registerSuccess]);
-
-  const handleLogout = () => {
-    adminAuthService.logout();
-    navigate('/admin/login', { replace: true });
-  };
 
   const handleOpenRegister = () => {
     setRegisterForm(emptyRegisterForm);
@@ -277,48 +215,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <Box className="adminUsersShell">
-      <aside className="adminUsersSidebar">
-        <Box className="adminUsersBrand">
-          <Box className="adminUsersBrandMark">P</Box>
-          <Box>
-            <b>payrollly</b>
-            <Typography>WORKFORCE OS</Typography>
-          </Box>
-        </Box>
-
-        <nav className="adminUsersNav">
-          {navSections.map((section) => (
-            <Box key={section.label}>
-              <Typography className="adminUsersNavLabel">{section.label}</Typography>
-              {section.items.map((item) => (
-                <NavLink key={item.label} to={item.to} className="adminUsersNavLink">
-                  {item.icon}
-                  <span>{item.label}</span>
-                </NavLink>
-              ))}
-            </Box>
-          ))}
-        </nav>
-
-        <Box className="adminUsersSidebarFoot">
-          <Button fullWidth startIcon={<Logout />} color="inherit" onClick={handleLogout}>Logout</Button>
-        </Box>
-      </aside>
-
-      <Box className="adminUsersMain">
-        <header className="adminUsersTopbar">
-          <Typography className="adminUsersTitle">Super Admin Users</Typography>
-          <Box className="adminUsersProfileChip">
-            <Avatar className="adminUsersAvatar">{initials}</Avatar>
-            <Box className="adminUsersProfileMeta">
-              <div className="adminUsersProfileName">{adminName}</div>
-              <div className="adminUsersProfileRole">Super Admin</div>
-            </Box>
-          </Box>
-        </header>
-
-        <main className="adminUsersContent">
+    <AdminShell title="Super Admin Users">
           <Box className="adminUsersPageHead">
             <Box>
               <h1>Super Admin Users</h1>
@@ -403,8 +300,6 @@ export default function AdminUsersPage() {
               </table>
             </Box>
           </section>
-        </main>
-      </Box>
 
       {registerOpen && (
         <div className="landing-page adminUsersRegisterModalLayer">
@@ -499,6 +394,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
-    </Box>
+    </AdminShell>
   );
 }

@@ -11,4 +11,6 @@ class AuditLogModel(Base):
     method = Column(String(10), nullable=False)
     endpoint = Column(String(500), nullable=False)
     status_code = Column(Integer, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    device_type = Column(String(20), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
