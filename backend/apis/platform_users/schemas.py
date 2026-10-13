@@ -12,3 +12,7 @@ class PlatFormUserRegisterSchema(BaseModel):
 class UpdateStatusSchema(BaseModel):
     user_id: int
     is_active: bool
+
+
+class CreateIntegrationApiSchema(BaseModel):
+    tenant_name: str

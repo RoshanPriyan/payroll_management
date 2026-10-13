@@ -9,6 +9,7 @@ from apis.workers.controllers.attendance_summary_api import attendance_summary_a
 from apis.workers.controllers.payment_process_details_api import payment_process_details_api
 from apis.workers.controllers.import_worker_details_api import import_worker_api
 from apis.workers.controllers.attendance_history_api import attendance_history_api
+from apis.workers.controllers.update_attendance_api import update_attendance_api
 
 
 router = APIRouter(prefix="/api/v1/worker", tags=["Workers"])
@@ -24,3 +25,4 @@ router.add_api_route("/attendance-summary", attendance_summary_api, methods=["GE
 router.add_api_route("/payment-detail-list", payment_process_details_api, methods=["GET"])
 router.add_api_route("/import-worker", import_worker_api, methods=["POST"])
 router.add_api_route("/attendance-history", attendance_history_api, methods=["POST"])
+router.add_api_route("/update-attendance", update_attendance_api, methods=["PUT"])

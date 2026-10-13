@@ -68,3 +68,9 @@ class AttendanceHistorySchema(PageNation):
     status: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+
+
+class AttendanceUpdateSchema(BaseModel):
+    id: int
+    status: str
+    remarks: Optional[str] = None

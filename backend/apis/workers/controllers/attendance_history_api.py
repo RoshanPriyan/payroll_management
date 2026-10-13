@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, func
 from math import ceil
 import traceback
+from datetime import date
 from database import get_db
 from auth import require_admin
 from global_utils import success_response, CustomException
@@ -21,15 +22,22 @@ async def attendance_history_api(
     try:
         tenant_id = current_user.get("tenant_id")
         filters = [AttendanceModel.tenant_id == tenant_id]
+        can_edit = True
 
-        if payload.status:
-            filters.append(AttendanceModel.attendance_status == payload.status)
+        # Default load today's attendance
+        if not payload.start_date and not payload.end_date and not payload.status:
+            filters.append(AttendanceModel.attendance_date == date.today())
+        else:
+            if payload.status:
+                filters.append(AttendanceModel.attendance_status == payload.status)
+            
+            if payload.start_date:
+                filters.append(AttendanceModel.attendance_date >= payload.start_date)
+                can_edit = False
 
-        if payload.start_date:
-            filters.append(AttendanceModel.attendance_date >= payload.start_date)
-
-        if payload.end_date:
-            filters.append(AttendanceModel.attendance_date <= payload.end_date)
+            if payload.end_date:
+                filters.append(AttendanceModel.attendance_date <= payload.end_date)
+                can_edit = False
 
         # Total Records Count
         total_records_stmt = select(func.count()).select_from(AttendanceModel).where(*filters)
@@ -62,8 +70,11 @@ async def attendance_history_api(
 
             first_name = data.pop("first_name")
             last_name = data.pop("last_name")
+            attendance_date = data.get("attendance_date")
 
             data["username"] = get_full_name(first_name, last_name)
+            data["can_edit"] = can_edit
+                
             attendance_history_res[index] = data
 
         total_pages = ceil(total_records / payload.limit) if total_records else 0

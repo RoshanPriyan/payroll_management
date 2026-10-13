@@ -36,9 +36,7 @@ async def create_worker_api(
         ifsc_code = data_dict.get("ifsc_code")
         upi_id = data_dict.get("upi_id")
 
-        existing_worker_stmt = select(WorkerModel).where(
-            WorkerModel.tenant_id == tenant_id,
-            WorkerModel.phone == phone)
+        existing_worker_stmt = select(WorkerModel).where(WorkerModel.tenant_id == tenant_id, WorkerModel.phone == phone)
         existing_worker = session.execute(existing_worker_stmt).scalar_one_or_none()
 
         if existing_worker:
