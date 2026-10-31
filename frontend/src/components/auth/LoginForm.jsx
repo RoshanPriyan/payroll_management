@@ -1,3 +1,5 @@
+import { Link as RouterLink } from 'react-router-dom';
+
 export default function LoginForm({ form, onChange }) {
   return (
     <>
@@ -30,7 +32,7 @@ export default function LoginForm({ form, onChange }) {
           <input type="checkbox" name="remember" checked={Boolean(form.remember)} onChange={onChange} />
           Remember Me
         </label>
-        <a href="#">Forgot Password?</a>
+        <RouterLink to="/resend-activation">Resend activation email</RouterLink>
       </div>
     </>
   );

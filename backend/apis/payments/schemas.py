@@ -23,3 +23,14 @@ class PaymentHistorySchema(PageNation):
     payment_mode: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+
+
+class CreateOrderSchema(BaseModel):
+    subscription_id: int = 2
+    payment_token: str
+
+
+class VerifyPaymentSchema(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str

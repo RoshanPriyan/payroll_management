@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP, func, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP, func, ForeignKey, DateTime, Text, Index
 from sqlalchemy.orm import relationship
 from database import Base
 from security import pwd_context, validate_bcrypt_password_length
@@ -14,7 +14,7 @@ class UserModel(Base):
     email = Column(String(255), unique=True, nullable=False)
     phone = Column(String(20), nullable=False)
     password_hash = Column(String(255), nullable=False)
-    status = Column(Enum("ACTIVE", "INACTIVE", name="user_status_enum"), nullable=False, default="ACTIVE")
+    status = Column(Enum("ACTIVE", "INACTIVE", name="user_status_enum"), nullable=False, default="INACTIVE")
     last_login = Column(DateTime, nullable=True )
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
@@ -55,3 +55,18 @@ class UserProfileModel(Base):
     country = relationship("CountryModel")
     state = relationship("StateModel")
     city = relationship("CityModel")
+
+
+class ActivationTokenModel(Base):
+    __tablename__ = "activation_tokens"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String(64), nullable=False, unique=True)
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.current_timestamp())
+
+    __table_args__ = (
+        Index("idx_activation_tokens_expires_at", "expires_at"),
+    )

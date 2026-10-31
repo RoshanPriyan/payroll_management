@@ -35,6 +35,12 @@ async def user_login_api(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
             )
+        
+        if user.status == "INACTIVE":
+            raise CustomException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is inactive"
+            )
 
         user.last_login = datetime.now()
 
@@ -42,6 +48,7 @@ async def user_login_api(
         tenant_name = session.execute(tenant_stmt).scalars().first()
 
         token = generate_access_token(user.id, user.tenant_id)
+        
         response = {
             "user_id": user.id,
             "first_name": user.first_name,

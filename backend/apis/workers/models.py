@@ -11,7 +11,7 @@ class WorkerModel(Base):
     first_name = Column(String(150), nullable=False)
     last_name = Column(String(150), nullable=True)
     phone = Column(String(20), nullable=False)
-    email = Column(String(150), unique=True, nullable=True)
+    email = Column(String(255), nullable=True)
     gender = Column(Enum("MALE", "FEMALE", name="gender_enum"), nullable=True)
     joining_date = Column(Date, nullable=False)
     salary_type = Column(Enum("DAILY", "WEEKLY", "MONTHLY", name="salary_type_enum"), nullable=False)

@@ -6,6 +6,7 @@ import LoginForm from './LoginForm.jsx';
 import RegisterForm from './RegisterForm.jsx';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STANDARD_PLAN_ID = 2;
 
 function getRegisterErrorMessage(error) {
   if (!error?.response) {
@@ -44,7 +45,7 @@ function getLoginErrorMessage(error) {
   return backendMessage || 'Something went wrong. Please try again later.';
 }
 
-export default function AuthModal({ mode, onClose, onSwitch }) {
+export default function AuthModal({ mode, subscriptionPlan = 1, onClose, onSwitch }) {
   const navigate = useNavigate();
   const auth = useAuth();
   const isLogin = mode === 'login';
@@ -52,6 +53,7 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const busy = useRef(false);
   const redirectTimer = useRef(null);
 
   useEffect(() => {
@@ -73,6 +75,7 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (busy.current) return;
 
     if (isLogin) {
       const payload = {
@@ -126,6 +129,7 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
       email: (form.email || '').trim(),
       password: form.password || '',
       confirm_password: form.confirm_password || '',
+      subscription_plan: Number(subscriptionPlan),
     };
 
     if (Object.values(payload).some((value) => !value)) {
@@ -149,18 +153,21 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
     }
 
     setLoading(true);
+    busy.current = true;
     setError('');
     setSuccess('');
 
     try {
       const response = await authService.register(payload);
-      setSuccess(response.data?.message || 'Registration successful.');
-      redirectTimer.current = window.setTimeout(() => {
-        onSwitch('login');
-      }, 1200);
+      const defaultMessage = Number(subscriptionPlan) === STANDARD_PLAN_ID
+        ? 'Registration successful! Please verify your email to continue with the payment.'
+        : 'Registration successful! Please check your email and click the activation link to activate your PayrollPro account.';
+      setSuccess(response.data?.message || defaultMessage);
+      redirectTimer.current = window.setTimeout(onClose, 2400);
     } catch (registerError) {
-      setError(getRegisterErrorMessage(registerError));
+      setError(registerError?.response ? getRegisterErrorMessage(registerError) : registerError?.message || getRegisterErrorMessage(registerError));
     } finally {
+      busy.current = false;
       setLoading(false);
     }
   };
@@ -181,10 +188,11 @@ export default function AuthModal({ mode, onClose, onSwitch }) {
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           {isLogin ? <LoginForm form={form} onChange={handleChange} /> : <RegisterForm form={form} onChange={handleChange} />}
 
+          {!isLogin && Number(subscriptionPlan) === STANDARD_PLAN_ID && <div className="auth-payment-summary"><strong>STANDARD</strong><span>30 days · Amount set by server</span></div>}
           {error && <p className="auth-error" role="alert">{error}</p>}
           {success && <p className="auth-success" role="alert">{success}</p>}
 
-          <button className="btn-gradient auth-submit" type="submit" disabled={loading}>
+          <button className="btn-gradient auth-submit" type="submit" disabled={loading || Boolean(success)}>
             {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
           </button>
           <p className="auth-switch">

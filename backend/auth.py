@@ -2,15 +2,19 @@ from fastapi import Header, Depends, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 import secrets
+import hashlib
 from jose import jwt, JWTError
 from global_utils import CustomException
 from config import JWT_SECRET, JWT_ALGORITHM, ADMIN_ROLE
 from apis.platform_users.models import ApiTokenModel
 from apis.tenant.models import TenantModel
+from apis.users.models import ActivationTokenModel
 from database import get_db
 
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
+ACTIVATION_LINK_EXPIRE_MINUTES = 5
+PAYMENT_FLOW_TOKEN_EXPIRE_MINUTES = 30
 
 
 def generate_access_token(user_id: int, tenant_id: int = None, role: str = ADMIN_ROLE):
@@ -122,3 +126,48 @@ def generate_api_token(tenant_code: str):
     random_part = secrets.token_urlsafe(16)
 
     return f"{tenant_code}{date_part}{time_part}{random_part}"
+
+
+def create_activation_token(session, tenant_id: int) -> str:
+    # Generate a secure random token
+    token = secrets.token_urlsafe(32)
+
+    # Store only its hash
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=ACTIVATION_LINK_EXPIRE_MINUTES)
+
+    activation_record = ActivationTokenModel(
+        tenant_id=tenant_id,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        used_at=None,
+    )
+
+    session.add(activation_record)
+    session.flush()
+
+    return token
+
+
+def create_payment_flow_token(tenant_id: int) -> str:
+    return jwt.encode(
+        {
+            "tenant_id": tenant_id,
+            "purpose": "standard_payment",
+            "exp": datetime.now(timezone.utc)
+            + timedelta(minutes=PAYMENT_FLOW_TOKEN_EXPIRE_MINUTES),
+        },
+        JWT_SECRET,
+        algorithm=JWT_ALGORITHM,
+    )
+
+
+def decode_payment_flow_token(token: str):
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except JWTError:
+        return None
+    if payload.get("purpose") != "standard_payment" or not payload.get("tenant_id"):
+        return None
+    return payload

@@ -20,28 +20,20 @@ import AdminShell from '../../components/admin/AdminShell.jsx';
 import '../../styles/adminUsers.css';
 
 const PAGE_LIMIT_OPTIONS = [10, 25, 50];
-const METHOD_OPTIONS = ['', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-const STATUS_OPTIONS = ['', '200', '201', '204', '400', '401', '403', '404', '422', '500'];
-const DEVICE_OPTIONS = ['', 'Desktop', 'Mobile', 'Tablet', 'Bot', 'Unknown'];
 
 const emptyFilters = {
   tenantId: '',
-  userId: '',
-  method: '',
-  endpoint: '',
-  statusCode: '',
-  ipAddress: '',
-  deviceType: '',
-  createdAt: '',
+  startDate: '',
+  endDate: '',
 };
 
 function getApiMessage(apiError, fallback) {
-  return (
-    apiError.response?.data?.detail
-    || apiError.response?.data?.details
-    || apiError.response?.data?.message
-    || fallback
-  );
+  const detail = apiError.response?.data?.detail;
+  if (Array.isArray(detail)) {
+    return detail.map((item) => item?.msg).filter(Boolean).join(', ') || fallback;
+  }
+
+  return detail || apiError.response?.data?.details || apiError.response?.data?.message || fallback;
 }
 
 function getItems(payload) {
@@ -49,6 +41,14 @@ function getItems(payload) {
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
   if (Array.isArray(payload?.results)) return payload.results;
   if (Array.isArray(payload?.logs)) return payload.logs;
+  return [];
+}
+
+function getTenantItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.tenant_list)) return payload.data.tenant_list;
+  if (Array.isArray(payload?.tenants)) return payload.tenants;
   return [];
 }
 
@@ -65,7 +65,6 @@ function normalizeAuditLog(log) {
   return {
     id: log.id || log.audit_log_id || `${log.created_at || log.createdAt}-${log.endpoint}-${log.user_id || log.username}`,
     tenantId: log.tenant_id ?? log.tenantId ?? '',
-    userId: log.user_id ?? log.userId ?? '',
     username: log.username || log.user_name || log.email || '',
     method: log.method || log.http_method || '',
     endpoint: log.endpoint || log.path || log.url || '',
@@ -101,6 +100,8 @@ function getStatusClass(statusCode) {
 
 function AdminAuditLogsContent() {
   const [logs, setLogs] = useState([]);
+  const [tenants, setTenants] = useState([]);
+  const [tenantLoading, setTenantLoading] = useState(true);
   const [filters, setFilters] = useState(emptyFilters);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -113,18 +114,31 @@ function AdminAuditLogsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    let isCurrent = true;
+
+    adminAuditLogApi.getTenants()
+      .then((response) => {
+        if (isCurrent) setTenants(getTenantItems(response.data || {}));
+      })
+      .catch(() => {
+        if (isCurrent) setTenants([]);
+      })
+      .finally(() => {
+        if (isCurrent) setTenantLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
   const requestParams = useMemo(() => ({
     page,
     limit,
-    tenant_id: filters.tenantId || undefined,
-    user_id: filters.userId || undefined,
-    username: filters.userId || undefined,
-    method: filters.method || undefined,
-    endpoint: filters.endpoint || undefined,
-    status_code: filters.statusCode || undefined,
-    ip_address: filters.ipAddress || undefined,
-    device_type: filters.deviceType || undefined,
-    created_at: filters.createdAt || undefined,
+    tenant_id: filters.tenantId || null,
+    start_date: filters.startDate || null,
+    end_date: filters.endDate || null,
   }), [filters, limit, page]);
 
   const loadAuditLogs = useCallback(async () => {
@@ -172,7 +186,7 @@ function AdminAuditLogsContent() {
       <Box className="adminUsersPageHead">
         <Box>
           <h1>Audit Logs</h1>
-          <p>Review system activity by tenant, user, method, endpoint, status, IP, device, and created date.</p>
+          <p>Review system activity by tenant and date range.</p>
         </Box>
         <Button variant="outlined" startIcon={<Refresh />} onClick={loadAuditLogs} disabled={loading}>
           Refresh
@@ -183,42 +197,30 @@ function AdminAuditLogsContent() {
         <CardContent>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Tenant ID</Typography>
-              <TextField fullWidth size="small" value={filters.tenantId} onChange={(event) => handleFilterChange('tenantId', event.target.value)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>User ID / Username</Typography>
-              <TextField fullWidth size="small" value={filters.userId} onChange={(event) => handleFilterChange('userId', event.target.value)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Method</Typography>
-              <Select fullWidth size="small" value={filters.method} onChange={(event) => handleFilterChange('method', event.target.value)}>
-                {METHOD_OPTIONS.map((option) => <MenuItem key={option || 'all'} value={option}>{option || 'All'}</MenuItem>)}
+              <Typography className="muted" mb={0.75}>Tenant Name</Typography>
+              <Select
+                fullWidth
+                size="small"
+                value={filters.tenantId}
+                onChange={(event) => handleFilterChange('tenantId', event.target.value)}
+                displayEmpty
+              >
+                <MenuItem value="">All tenants</MenuItem>
+                {tenantLoading && <MenuItem value="" disabled>Loading tenants...</MenuItem>}
+                {tenants.map((tenant) => {
+                  const tenantId = tenant.id ?? tenant.tenant_id;
+                  const tenantName = tenant.tenant_name || tenant.business_name || tenant.name || `Tenant ${tenantId}`;
+                  return tenantId != null ? <MenuItem key={tenantId} value={String(tenantId)}>{tenantName}</MenuItem> : null;
+                })}
               </Select>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Endpoint</Typography>
-              <TextField fullWidth size="small" value={filters.endpoint} onChange={(event) => handleFilterChange('endpoint', event.target.value)} />
+              <Typography className="muted" mb={0.75}>Start Date</Typography>
+              <TextField fullWidth size="small" type="date" value={filters.startDate} onChange={(event) => handleFilterChange('startDate', event.target.value)} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Status Code</Typography>
-              <Select fullWidth size="small" value={filters.statusCode} onChange={(event) => handleFilterChange('statusCode', event.target.value)}>
-                {STATUS_OPTIONS.map((option) => <MenuItem key={option || 'all'} value={option}>{option || 'All'}</MenuItem>)}
-              </Select>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>IP Address</Typography>
-              <TextField fullWidth size="small" value={filters.ipAddress} onChange={(event) => handleFilterChange('ipAddress', event.target.value)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Device Type</Typography>
-              <Select fullWidth size="small" value={filters.deviceType} onChange={(event) => handleFilterChange('deviceType', event.target.value)}>
-                {DEVICE_OPTIONS.map((option) => <MenuItem key={option || 'all'} value={option}>{option || 'All'}</MenuItem>)}
-              </Select>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography className="muted" mb={0.75}>Created At</Typography>
-              <TextField fullWidth size="small" type="date" value={filters.createdAt} onChange={(event) => handleFilterChange('createdAt', event.target.value)} />
+              <Typography className="muted" mb={0.75}>End Date</Typography>
+              <TextField fullWidth size="small" type="date" value={filters.endDate} onChange={(event) => handleFilterChange('endDate', event.target.value)} />
             </Grid>
             <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Stack direction="row" gap={1}>
@@ -244,7 +246,7 @@ function AdminAuditLogsContent() {
             <thead>
               <tr>
                 <th>Tenant ID</th>
-                <th>User ID / Username</th>
+                <th>Username</th>
                 <th>Method</th>
                 <th>Endpoint</th>
                 <th>Status Code</th>
@@ -262,10 +264,7 @@ function AdminAuditLogsContent() {
               {!loading && !error && logs.map((log) => (
                 <tr key={log.id}>
                   <td><span className="adminUsersCode">{log.tenantId || '-'}</span></td>
-                  <td>
-                    <b>{log.username || log.userId || '-'}</b>
-                    {log.username && log.userId ? <div className="adminUsersEmail">{log.userId}</div> : null}
-                  </td>
+                  <td><b>{log.username || '-'}</b></td>
                   <td><span className="workerAdminBadge">{log.method || '-'}</span></td>
                   <td className="adminUsersEmail">{log.endpoint || '-'}</td>
                   <td><span className={`adminUsersStatus ${getStatusClass(log.statusCode)}`}>{log.statusCode || '-'}</span></td>

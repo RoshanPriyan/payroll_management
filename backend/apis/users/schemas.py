@@ -13,6 +13,7 @@ class UserRegisterSchema(BaseModel):
     email: str
     password: str
     confirm_password: str
+    subscription_plan: int
 
     @field_validator("password", "confirm_password")
     @classmethod
@@ -52,3 +53,11 @@ class ForgotPasswordSchema(BaseModel):
                 detail="Password and confirm password do not match"
                 )
         return self
+
+
+class ActivationTokenSchema(BaseModel):
+    token: str
+
+
+class ResendActivationSchema(BaseModel):
+    email: str

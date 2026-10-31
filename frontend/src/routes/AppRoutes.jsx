@@ -20,12 +20,16 @@ import AddWorkerPage from '../pages/workers/AddWorkerPage.jsx';
 import EditWorkerPage from '../pages/workers/EditWorkerPage.jsx';
 import WorkerListPage from '../pages/workers/WorkerListPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
+import ActivateAccount from '../pages/ActivateAccount.jsx';
+import ResendActivationPage from '../pages/ResendActivationPage.jsx';
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/activate" element={<ActivateAccount />} />
+      <Route path="/resend-activation" element={<ResendActivationPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route element={<AdminRoute />}>

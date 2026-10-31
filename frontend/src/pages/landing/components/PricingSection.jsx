@@ -1,14 +1,16 @@
 const plans = [
   {
+    id: 1,
     name: 'Free Plan',
     price: '\u20B90',
     suffix: '/mo',
     description: 'Perfect for trying things out',
-    features: ['10 Employees', 'Attendance Tracking', 'Basic Payroll', '30-Day Trial'],
+    features: ['10 Employees', 'Attendance Tracking', 'Basic Priority Support', '15-Day Trial'],
     cta: 'Get Started',
     featured: false,
   },
   {
+    id: 2,
     name: 'Standard Plan',
     price: '\u20B9499',
     suffix: '/mo',
@@ -50,7 +52,7 @@ export default function PricingSection({ onOpenModal }) {
               <button
                 type="button"
                 className={`${plan.featured ? 'btn-light-hero' : 'btn-outline-custom'} w-100 mt-3`}
-                onClick={() => onOpenModal('register')}
+                onClick={() => onOpenModal('register', plan.id)}
               >
                 {plan.cta}
               </button>

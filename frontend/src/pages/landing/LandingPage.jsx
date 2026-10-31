@@ -20,6 +20,12 @@ export default function LandingPage({ initialModalMode = null }) {
     }
   });
   const [modalMode, setModalMode] = useState(initialModalMode);
+  const [subscriptionPlan, setSubscriptionPlan] = useState(1);
+
+  const openAuthModal = (mode, planId = 1) => {
+    if (mode === 'register') setSubscriptionPlan(planId);
+    setModalMode(mode);
+  };
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -57,17 +63,17 @@ export default function LandingPage({ initialModalMode = null }) {
       <Navbar
         theme={theme}
         onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
-        onOpenModal={setModalMode}
+        onOpenModal={openAuthModal}
       />
-      <HeroSection onOpenModal={setModalMode} />
+      <HeroSection onOpenModal={openAuthModal} />
       <FeaturesSection />
       <HowItWorksSection />
-      <PricingSection onOpenModal={setModalMode} />
+      <PricingSection onOpenModal={openAuthModal} />
       <DashboardPreview />
       <TestimonialsSection />
-      <CTASection onOpenModal={setModalMode} />
+      <CTASection onOpenModal={openAuthModal} />
       <Footer />
-      {modalMode && <AuthModal key={modalMode} mode={modalMode} onClose={() => setModalMode(null)} onSwitch={setModalMode} />}
+      {modalMode && <AuthModal key={modalMode} mode={modalMode} subscriptionPlan={subscriptionPlan} onClose={() => setModalMode(null)} onSwitch={openAuthModal} />}
     </div>
   );
 }

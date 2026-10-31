@@ -29,8 +29,6 @@ async def get_tenant_config_api(
         #     TenantConfigurationModel.monthly_payout_time
         # )
         tenant_config = DBService.scalars_first(session=session, model=TenantConfigurationModel, tenant_id=tenant_id)
-        print(tenant_config)
-
 
         return success_response(
             status_code=status.HTTP_200_OK,

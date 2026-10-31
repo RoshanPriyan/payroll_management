@@ -29,7 +29,7 @@ export default function HeroSection({ onOpenModal }) {
               </div>
               <div>
                 <i className="fa-solid fa-check-circle" aria-hidden="true"></i>
-                30-day free trial
+                15-day free trial
               </div>
             </div>
           </div>
