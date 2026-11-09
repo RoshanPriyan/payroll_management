@@ -33,3 +33,4 @@ class TenantConfigurationModel(Base):
     monthly_payout_time = Column(Time, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    enable_time_tracking = Column(Boolean, default=False, nullable=False)

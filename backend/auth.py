@@ -1,12 +1,13 @@
 from fastapi import Header, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
 import secrets
 from jose import jwt, JWTError
 from global_utils import CustomException
 from config import JWT_SECRET, JWT_ALGORITHM, ADMIN_ROLE
 from apis.platform_users.models import ApiTokenModel
-from apis.tenant.models import TenantModel
+from apis.tenant.models import TenantModel, TenantConfigurationModel
 from database import get_db
 
 
@@ -71,6 +72,7 @@ def get_current_user(
         tenant = session.query(TenantModel).filter(
             TenantModel.id == api_token.tenant_id
         ).first()
+        
 
         if not tenant or tenant.status != "ACTIVE":
             raise CustomException(
@@ -93,7 +95,14 @@ def get_current_user(
             status_code=401,
             detail="Token expired or invalid"
         )
-
+    
+    tenant_stmt = (
+        select(TenantConfigurationModel.enable_time_tracking)
+        .where(TenantConfigurationModel.tenant_id == payload.get("tenant_id"))
+        )
+    tenant_config = session.execute(tenant_stmt).scalar_one_or_none()
+    payload["enable_time_tracking"] = tenant_config
+    
     return payload
 
 

@@ -7,9 +7,10 @@ import traceback
 from database import get_db
 from global_utils import success_response, CustomException
 from apis.users.models import UserModel
-from apis.tenant.models import TenantModel
+from apis.tenant.models import TenantModel, TenantConfigurationModel
 from apis.users.schemas import UserLoginSchema
 from auth import generate_access_token
+from db_service import DBService
 
 
 async def user_login_api(
@@ -42,12 +43,17 @@ async def user_login_api(
         tenant_name = session.execute(tenant_stmt).scalars().first()
 
         token = generate_access_token(user.id, user.tenant_id)
+        tenant_config = DBService.scalars_first(session=session, model=TenantConfigurationModel, tenant_id=user.tenant_id)
+        
         response = {
             "user_id": user.id,
             "first_name": user.first_name,
             "last_name": user.last_name if user.last_name else None,
             "access_token": token,
-            "tenant_name": tenant_name
+            "tenant_name": tenant_name,
+            "tenant_configuration": {
+                "enable_time_tracking": tenant_config.enable_time_tracking
+            }
         }
         session.commit()
 

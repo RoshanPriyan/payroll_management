@@ -21,6 +21,7 @@ async def create_attendance_api(
         data = data.model_dump()
 
         tenant_id = current_user.get("tenant_id")
+        enable_time_tracking = current_user.get("enable_time_tracking")
         attendance_date = data.get("attendance_date")
         workers = data.get("workers", [])
 
@@ -29,6 +30,7 @@ async def create_attendance_api(
         for item in workers:
             worker_id = item.get("worker_id")
             attendance_status = item.get("attendance_status")
+            in_time = item.get("in_time")
 
             worker = DBService.scalars_first(
                 session=session,
@@ -63,7 +65,8 @@ async def create_attendance_api(
                     business_id=worker.business_id,
                     worker_id=worker_id,
                     attendance_date=attendance_date,
-                    attendance_status=attendance_status
+                    attendance_status=attendance_status,
+                    in_time=in_time if enable_time_tracking else None,
                 )
             )
 

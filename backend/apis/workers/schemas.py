@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from datetime import date
+from datetime import date, time
 from typing import Optional, List
 from enum import Enum
 
@@ -52,6 +52,7 @@ class UpdateWorkerSchema(CreateWorkerSchema):
 class WorkerAttendanceSchema(BaseModel):
     worker_id: int
     attendance_status: str
+    in_time: Optional[time] = None
 
 
 class CreateAttendanceSchema(BaseModel):

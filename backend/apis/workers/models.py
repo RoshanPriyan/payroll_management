@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Enum, Date, DECIMAL, TIMESTAMP, ForeignKey, func, Text
+from sqlalchemy import (Column, Integer, String, Enum, Date, DECIMAL, TIMESTAMP, ForeignKey, 
+                        func, Text, Time
+    )
 from database import Base
 
 
@@ -37,3 +39,5 @@ class AttendanceModel(Base):
     attendance_status = Column(Enum("PRESENT", "ABSENT", "HALF_DAY", name="attendance_status_enum"), nullable=False)
     remarks = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
+    in_time = Column(Time, nullable=True)
+    out_time = Column(Time, nullable=True)
