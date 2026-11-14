@@ -8,7 +8,7 @@ class UserModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     first_name = Column(String(150), nullable=False)
     last_name = Column(String(150), nullable=True)
     email = Column(String(255), unique=True, nullable=False)
@@ -48,7 +48,7 @@ class UserProfileModel(Base):
     zip_code = Column(String(20), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
-    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=True)
 
     # Relationships
     user = relationship("UserModel", back_populates="profile")

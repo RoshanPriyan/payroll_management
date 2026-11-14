@@ -5,8 +5,8 @@ from pathlib import Path
 from datetime import datetime
 import random
 import smtplib
-from config import SMTP_HOST, SMTP_PORT, SMTP_EMAIL, SMTP_USERNAME, SMTP_PASSWORD, FRONTEND_URL
-
+import ssl
+from config import SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, FRONTEND_URL
 
 def success_response(status_code: int, details: str, data=None, pagination=None) -> dict:
     response = {
@@ -85,45 +85,48 @@ template_env = Environment(
 )
 
 
-SMTP_LOGIN_EMAIL = SMTP_USERNAME
-SENDER_EMAIL = "no-reply@payrollpro.com"
-SENDER_NAME = "PayrollPro"
-
-
 def send_activation_email(tenant_id, user_name, email, activation_token, subscription_plan):
     template = template_env.get_template("activate_email.html")
 
     frontend_url = (FRONTEND_URL or "").rstrip("/")
-    if not frontend_url:
-        raise ValueError("FRONTEND_URL must be configured to send activation emails")
-    
-    activation_link = f"{frontend_url}/activate?token={activation_token}"
 
+    if not frontend_url:
+        raise ValueError("FRONTEND_URL must be configured")
+
+    activation_link = f"{frontend_url}/activate?token={activation_token}"
     expire_duration = "5 Minutes"
-    current_year = datetime.now().year
 
     html_content = template.render(
         user_name=user_name,
         activation_link=activation_link,
         expiry_duration=expire_duration,
-        support_email=SMTP_EMAIL,
-        current_year=current_year,
+        support_email="support@westernspiera.com",
+        current_year=datetime.now().year,
         subscription_plan=subscription_plan
     )
 
     message = EmailMessage()
+
     message["Subject"] = "Activate your PayrollPro account"
-    message["From"] = formataddr((SENDER_NAME, SENDER_EMAIL))
+    message["From"] = formataddr("PayrollPro", "support@westernspiera.com")
     message["To"] = email
 
     message.set_content(
         f"Hello {user_name},\n\n"
-        f"Activate your PayrollPro account:\n{activation_link}\n\n"
+        f"Activate your PayrollPro account:\n"
+        f"{activation_link}\n\n"
         f"This link expires in {expire_duration}."
     )
+
     message.add_alternative(html_content, subtype="html")
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
-        server.starttls()
-        server.login(SMTP_LOGIN_EMAIL, SMTP_PASSWORD)
-        server.send_message(message)
+    try:
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30, context=context) as server:
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(message)
+        return True
+
+    except Exception:
+        raise

@@ -32,7 +32,6 @@ export default function LoginForm({ form, onChange }) {
           <input type="checkbox" name="remember" checked={Boolean(form.remember)} onChange={onChange} />
           Remember Me
         </label>
-        <RouterLink to="/resend-activation">Resend activation email</RouterLink>
       </div>
     </>
   );

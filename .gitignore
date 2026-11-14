@@ -16,3 +16,7 @@ backend/.env
 
 # Logs
 *.log
+
+backend/apis/payments/controllers/manual_payment_api.py
+backend/background/
+backend/celerybeat-schedule

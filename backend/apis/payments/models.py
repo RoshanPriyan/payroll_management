@@ -20,7 +20,7 @@ class PaymentTransactionModel(Base):
     __tablename__ = "payment_transactions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
     subscription_id = Column(Integer, nullable=False)
     razorpay_order_id = Column(String(100), nullable=False, unique=True)
     razorpay_payment_id = Column(String(100), nullable=True, unique=True)

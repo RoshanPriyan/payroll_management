@@ -11,6 +11,7 @@ from apis.users.models import UserModel
 from apis.users.schemas import ResendActivationSchema
 from apis.users.utils import get_full_name
 from apis.users.models import ActivationTokenModel
+from config import ENVIRONMENT_MODE
 
 
 async def resend_activation_email_api(
@@ -81,7 +82,8 @@ async def resend_activation_email_api(
         user_name = get_full_name(existing_user.first_name, existing_user.last_name)
         subscription_plan = existing_tenant.subscription_plan
 
-        send_activation_email(tenant_id, user_name, existing_user.email, activation_token, subscription_plan)
+        if ENVIRONMENT_MODE == "PRODUCTION":
+            send_activation_email(tenant_id, user_name, existing_user.email, activation_token, subscription_plan)
 
         return success_response(
             status_code=status.HTTP_200_OK,

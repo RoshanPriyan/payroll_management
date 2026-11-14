@@ -11,7 +11,7 @@ from apis.users.models import UserModel, UserProfileModel
 from apis.users.schemas import UserRegisterSchema
 from auth import create_activation_token
 from apis.users.utils import get_full_name
-from config import SUBSCRIPTION_PLAN, SUBSCRIPTION_DAY_COUNT
+from config import SUBSCRIPTION_PLAN, SUBSCRIPTION_DAY_COUNT, ENVIRONMENT_MODE
 
 
 async def user_register_api(
@@ -99,7 +99,9 @@ async def user_register_api(
 
         activation_token = create_activation_token(session, tenant_data.id)
         user_name = get_full_name(first_name, last_name)
-        send_activation_email(tenant_data.id, user_name, email, activation_token, plan_name)
+        
+        if ENVIRONMENT_MODE == "PRODUCTION":
+            send_activation_email(tenant_data.id, user_name, email, activation_token, plan_name)
 
         session.commit()
 

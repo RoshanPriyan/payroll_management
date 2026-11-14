@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from database import get_db
 from routers import router
 from custom_middleware import ExceptionHandlerMiddleware
 from fastapi.middleware.cors import CORSMiddleware

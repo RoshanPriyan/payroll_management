@@ -8,7 +8,7 @@ class BusinessModel(Base):
     __tablename__ = "businesses"
 
     id = Column(Integer, primary_key=True, index=True)
-    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, unique=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, unique=True)
     business_name = Column(String(150), nullable=False)
     business_type = Column(String(100), nullable=True)
     address = Column(Text, nullable=True)

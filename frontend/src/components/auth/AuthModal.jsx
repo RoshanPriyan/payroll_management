@@ -4,6 +4,7 @@ import { useAuth } from '../../context/auth/useAuth.js';
 import { authService } from '../../services/authService.js';
 import LoginForm from './LoginForm.jsx';
 import RegisterForm from './RegisterForm.jsx';
+import { Link as RouterLink } from 'react-router-dom';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const STANDARD_PLAN_ID = 2;
@@ -195,6 +196,12 @@ export default function AuthModal({ mode, subscriptionPlan = 1, onClose, onSwitc
           <button className="btn-gradient auth-submit" type="submit" disabled={loading || Boolean(success)}>
             {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
           </button>
+          {isLogin && (
+            <p className="auth-activation-prompt">
+              Didn't receive your activation email?<br />
+              <RouterLink to="/resend-activation"><strong>Resend activation email</strong></RouterLink>
+            </p>
+          )}
           <p className="auth-switch">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}
             <button type="button" onClick={() => onSwitch(isLogin ? 'register' : 'login')} disabled={loading}>
